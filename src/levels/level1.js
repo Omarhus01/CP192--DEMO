@@ -11,6 +11,19 @@ export const level1 = {
   paramName: 'gap',
   initialValue: 4,
 
+  // ── Guided phase ──────────────────────────────────────────────────────────
+  guidedSteps: [
+    { text: "Look at the gap. The character cannot jump it alone. The gap is too large.", highlight: 'scene' },
+    { text: "You will write a function called solve. It takes the gap size as input. Your job is to make the character reach the other side.", highlight: 'editor' },
+    { text: "Watch this panel. Every time your function calls itself, a new entry appears here. This is the call stack. It is important. Look at it.", highlight: 'callstack' },
+    { text: "There are two things your function needs. A stopping condition — when the gap is small enough to jump directly. And a recursive call — for when it isn't. You will write both.", highlight: null },
+  ],
+
+  scaffoldIntroLine: "Good. You understand the problem. Now try filling in the blanks. The function is mostly there — you just need to provide two values.",
+  scaffoldTemplate: "if gap <= ___:\n    return True\nreturn solve(___)",
+  scaffoldWrongLine: "Not quite. The first blank is the threshold — when is the gap small enough? The second blank is the smaller version of the problem.",
+  freePhaseIntro: "Good. Now write it yourself. From scratch. No hints.",
+
   // Pre-filled in the editor (read-only signature, editable body)
   starterCode: `    # When is the gap small enough to jump?
     # When it isn't, what should the clone do?

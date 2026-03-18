@@ -1,8 +1,10 @@
 import { useReducer, useEffect, useRef } from 'react'
-import SceneView      from './SceneView.jsx'
-import CallStackPanel from './CallStackPanel.jsx'
-import CodeEditor     from './CodeEditor.jsx'
-import NarratorBox    from './NarratorBox.jsx'
+import SceneView       from './SceneView.jsx'
+import CallStackPanel  from './CallStackPanel.jsx'
+import CodeEditor      from './CodeEditor.jsx'
+import NarratorBox     from './NarratorBox.jsx'
+import PhaseIndicator  from './PhaseIndicator.jsx'
+import ScaffoldEditor  from './ScaffoldEditor.jsx'
 import { executeCode, isUnrecognizedCode } from '../systems/codeExecutor.js'
 import { didIgnoreCallStack, getIdleTrigger, outcomeToNarratorTrigger } from '../systems/edgeCaseDetector.js'
 import { getLine, getExpression, speak, getSyntaxRepeatLine, LINES } from '../systems/narratorSystem.js'
@@ -25,6 +27,8 @@ function makeInitial(level) {
     callStackInteracted: false,
     characterAtEnd: false,
     errorLine:      null,
+    levelPhase:     'guided',
+    guidedStep:     0,
   }
 }
 
@@ -41,8 +45,11 @@ function reducer(state, action) {
     case 'CHAR_AT_END':    return { ...state, characterAtEnd: true }
     case 'WRONG_STREAK':   return { ...state, wrongStreak: state.wrongStreak + 1 }
     case 'OPEN_HINT':      return { ...state, hintOpen: true }
-    case 'RESET':          return { ...makeInitial(action.level), resetCount: state.resetCount + 1 }
-    case 'STACK_INTERACT': return { ...state, callStackInteracted: true }
+    case 'RESET':           return { ...makeInitial(action.level), resetCount: state.resetCount + 1, levelPhase: state.levelPhase, guidedStep: state.levelPhase === 'guided' ? state.guidedStep : 0 }
+    case 'NEXT_GUIDED_STEP': return { ...state, guidedStep: state.guidedStep + 1 }
+    case 'SET_LEVEL_PHASE':  return { ...state, levelPhase: action.payload }
+    case 'SCAFFOLD_SUCCESS': return { ...makeInitial(action.level), resetCount: state.resetCount, levelPhase: 'free' }
+    case 'STACK_INTERACT':  return { ...state, callStackInteracted: true }
     case 'SET_ERROR':      return { ...state, errorLine: action.payload, phase: 'idle' }
     default:               return state
   }
@@ -104,13 +111,31 @@ export default function LevelScreen({
     return () => clearInterval(idleTimerRef.current)
   }, []) // eslint-disable-line
 
-  // ── Level intro ─────────────────────────────────────────────────────────────
+  // ── Level intro (only when no guided steps) ─────────────────────────────────
 
   useEffect(() => {
+    if (level.guidedSteps?.length > 0) return
     const key = level.id === 1 ? 'level1Intro' : 'level2Intro'
     const t = setTimeout(() => fireNarrator(key), 1200)
     return () => clearTimeout(t)
   }, [level.id]) // eslint-disable-line
+
+  // ── Guided phase: fire narrator for current step ─────────────────────────────
+
+  useEffect(() => {
+    if (state.levelPhase !== 'guided') return
+    const steps = level.guidedSteps ?? []
+    const step  = steps[state.guidedStep]
+    if (!step) return
+    const delay = state.guidedStep === 0 ? 800 : 300
+    const t = setTimeout(() => {
+      const mut = isMutedRef.current
+      onNarratorLineRef.current(step.text, lineTrackerRef.current)
+      playNarratorClick(mut)
+      speak(step.text, mut, narratorStateRef.current.attemptCount)
+    }, delay)
+    return () => clearTimeout(t)
+  }, [state.levelPhase, state.guidedStep]) // eslint-disable-line
 
   // ── Animation engine ────────────────────────────────────────────────────────
 
@@ -241,6 +266,56 @@ export default function LevelScreen({
     dispatch({ type: 'OPEN_HINT' })
   }
 
+  // ── Guided / scaffold phase handlers ─────────────────────────────────────────
+
+  function handleGuidedNext() {
+    const steps = level.guidedSteps ?? []
+    if (state.guidedStep < steps.length - 1) {
+      dispatch({ type: 'NEXT_GUIDED_STEP' })
+    } else {
+      dispatch({ type: 'SET_LEVEL_PHASE', payload: 'scaffold' })
+      if (level.scaffoldIntroLine) {
+        setTimeout(() => {
+          const mut = isMutedRef.current
+          onNarratorLineRef.current(level.scaffoldIntroLine, lineTrackerRef.current)
+          playNarratorClick(mut)
+          speak(level.scaffoldIntroLine, mut, narratorStateRef.current.attemptCount)
+        }, 400)
+      }
+    }
+  }
+
+  function fireScaffoldLine(text) {
+    const mut = isMutedRef.current
+    onNarratorLineRef.current(text, lineTrackerRef.current)
+    playNarratorClick(mut)
+    speak(text, mut, narratorStateRef.current.attemptCount)
+  }
+
+  async function handleScaffoldRun(filledCode) {
+    if (isRunningRef.current) return
+    resetIdle()
+    isRunningRef.current = true
+    dispatch({ type: 'SET_PHASE', payload: 'running' })
+
+    let result
+    try {
+      result = await executeCode(level, filledCode)
+    } finally {
+      isRunningRef.current = false
+    }
+
+    simResultRef.current = result
+
+    if (result.outcome === 'syntaxError') {
+      dispatch({ type: 'SET_ERROR', payload: result.error })
+      fireScaffoldLine(level.scaffoldWrongLine ?? "Not quite. Check your blanks.")
+      return
+    }
+
+    dispatch({ type: 'START_ANIM', steps: result.steps })
+  }
+
   // ── Outcome handlers ─────────────────────────────────────────────────────────
 
   function handleSuccess() {
@@ -248,6 +323,15 @@ export default function LevelScreen({
     const lt      = lineTrackerRef.current
     const isFirst = ns.attemptCount === 0
     const s       = stateRef.current
+
+    // ── Scaffold phase success: transition to free ─────────────────────────
+    if (s.levelPhase === 'scaffold') {
+      const text = level.freePhaseIntro ?? "Good. Now write it yourself."
+      fireScaffoldLine(text)
+      setTimeout(() => dispatch({ type: 'SCAFFOLD_SUCCESS', level }), 1800)
+      return
+    }
+
     const unrecog = isUnrecognizedCode(s.userCode ?? '', level.functionName)
 
     let text, nextTracker
@@ -281,6 +365,15 @@ export default function LevelScreen({
   }
 
   function handleWrongResult(outcome) {
+    // ── Scaffold phase: don't escalate narrator, just give scaffold hint ───
+    if (stateRef.current.levelPhase === 'scaffold') {
+      document.body.classList.add('shake')
+      setTimeout(() => document.body.classList.remove('shake'), 450)
+      fireScaffoldLine(level.scaffoldWrongLine ?? "Not quite. Check your blanks.")
+      setTimeout(() => { dispatch({ type: 'RESET', level }); simResultRef.current = null }, 2400)
+      return
+    }
+
     onWrongAttempt?.()
     onlySyntaxErrorsRef.current = false
     dispatch({ type: 'WRONG_STREAK' })
@@ -293,11 +386,17 @@ export default function LevelScreen({
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
-  const expression = getExpression(narratorState)
+  const expression       = getExpression(narratorState)
+  const hasGuided        = (level.guidedSteps?.length ?? 0) > 0
+  const currentHighlight = state.levelPhase === 'guided'
+    ? (level.guidedSteps?.[state.guidedStep]?.highlight ?? null)
+    : null
+  const isAnimBusy = state.phase === 'animating' || state.phase === 'running'
 
   return (
     <div className={styles.screen} onMouseMove={resetIdle}>
-      {/* Header */}
+
+      {/* ── Header ── */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <span className={styles.levelTag}>LEVEL {level.id}</span>
@@ -306,61 +405,109 @@ export default function LevelScreen({
         <span className={styles.levelSubtitle}>{level.subtitle}</span>
       </div>
 
-      {/* 3-column layout */}
+      {/* ── Phase indicator ── */}
+      {hasGuided && <PhaseIndicator phase={state.levelPhase} />}
+
+      {/* ── 3-column layout ── */}
       <div className={styles.main} id="puzzle-scene">
-        <SceneView
-          level={level}
-          clones={state.clones}
-          characterAtEnd={state.characterAtEnd}
-        />
 
-        <CallStackPanel
-          entries={state.callStack}
-          functionName={level.functionName}
-          onInteract={() => dispatch({ type: 'STACK_INTERACT' })}
-        />
-
-        {/* Right panel: editor + buttons */}
-        <div className={styles.rightPanel}>
-          <CodeEditor
+        {/* Scene column */}
+        <div className={`${styles.sceneWrapper} ${currentHighlight === 'scene' ? styles.colHighlighted : ''}`}>
+          <SceneView
             level={level}
-            onChange={code => dispatch({ type: 'SET_CODE', payload: code })}
-            disabled={state.phase === 'animating'}
-            errorLine={state.errorLine}
+            clones={state.clones}
+            characterAtEnd={state.characterAtEnd}
           />
+        </div>
 
-          <div className={styles.actions}>
-            <button
-              className={styles.btnRun}
-              onClick={handleRun}
-              disabled={state.phase === 'animating' || state.phase === 'running'}
-            >
-              {state.phase === 'running' ? '⏳ RUNNING…' : '▶ RUN'}
-            </button>
-            <button
-              className={styles.btnReset}
-              onClick={handleReset}
-              disabled={state.phase === 'animating' || state.phase === 'running'}
-            >
-              RESET
-            </button>
-            {state.wrongStreak >= 2 && !state.hintOpen && (
-              <button
-                className={styles.btnHint}
-                onClick={handleHint}
-                disabled={state.phase === 'animating'}
-              >
-                💡 HINT
-              </button>
-            )}
-          </div>
+        {/* Call stack column */}
+        <div className={`${styles.stackWrapper} ${currentHighlight === 'callstack' ? styles.colHighlighted : ''}`}>
+          <CallStackPanel
+            entries={state.callStack}
+            functionName={level.functionName}
+            onInteract={() => dispatch({ type: 'STACK_INTERACT' })}
+          />
+        </div>
 
-          {state.hintOpen && level.hint && (
-            <div className={styles.hintBox}>
-              <div className={styles.hintLabel}>— DR. STACK'S HINT —</div>
-              <pre className={styles.hintCode}>{`def ${level.functionName}(${level.paramName}):\n${level.hint}`}</pre>
-              <div className={styles.hintNote}>Fill in the blanks. ___ marks what you need to figure out.</div>
-            </div>
+        {/* Right panel */}
+        <div className={styles.rightPanel}>
+
+          {state.levelPhase === 'scaffold' ? (
+            /* ── Scaffold phase: template with blanks ── */
+            <ScaffoldEditor
+              template={level.scaffoldTemplate}
+              functionName={level.functionName}
+              paramName={level.paramName}
+              onRun={handleScaffoldRun}
+              running={isAnimBusy}
+            />
+          ) : (
+            <>
+              {/* Editor with lock overlay in guided phase */}
+              <div className={`${styles.editorWrapper} ${currentHighlight === 'editor' ? styles.colHighlighted : ''}`}>
+                <CodeEditor
+                  level={level}
+                  onChange={code => dispatch({ type: 'SET_CODE', payload: code })}
+                  disabled={state.levelPhase === 'guided' || state.phase === 'animating'}
+                  errorLine={state.errorLine}
+                />
+                {state.levelPhase === 'guided' && (
+                  <div className={styles.editorLock}>
+                    <span className={styles.lockLabel}>LOCKED</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Controls: guided nav vs free run/reset */}
+              {state.levelPhase === 'guided' ? (
+                <div className={styles.guidedActions}>
+                  <span className={styles.stepCounter}>
+                    Step {state.guidedStep + 1} of {level.guidedSteps?.length ?? 0}
+                  </span>
+                  <button className={styles.btnNext} onClick={handleGuidedNext}>
+                    {state.guidedStep < (level.guidedSteps?.length ?? 0) - 1
+                      ? 'NEXT →'
+                      : 'GOT IT, LET ME TRY'}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className={styles.actions}>
+                    <button
+                      className={styles.btnRun}
+                      onClick={handleRun}
+                      disabled={isAnimBusy}
+                    >
+                      {state.phase === 'running' ? '⏳ RUNNING…' : '▶ RUN'}
+                    </button>
+                    <button
+                      className={styles.btnReset}
+                      onClick={handleReset}
+                      disabled={isAnimBusy}
+                    >
+                      RESET
+                    </button>
+                    {state.wrongStreak >= 2 && !state.hintOpen && (
+                      <button
+                        className={styles.btnHint}
+                        onClick={handleHint}
+                        disabled={state.phase === 'animating'}
+                      >
+                        💡 HINT
+                      </button>
+                    )}
+                  </div>
+
+                  {state.hintOpen && level.hint && (
+                    <div className={styles.hintBox}>
+                      <div className={styles.hintLabel}>— DR. STACK'S HINT —</div>
+                      <pre className={styles.hintCode}>{`def ${level.functionName}(${level.paramName}):\n${level.hint}`}</pre>
+                      <div className={styles.hintNote}>Fill in the blanks. ___ marks what you need to figure out.</div>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
           )}
         </div>
       </div>

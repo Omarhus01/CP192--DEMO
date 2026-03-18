@@ -1,0 +1,124 @@
+/* ── ScaffoldEditor ──────────────────────────────────────────────────────── */
+
+.scaffold {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* ── Signature row (matches CodeEditor style) ── */
+
+.signature {
+  padding: 6px 14px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.kw    { color: var(--blue);   font-weight: 700; }
+.fn    { color: var(--accent); }
+.punct { color: var(--text-dim); }
+.param { color: #c084fc; }
+
+/* ── Code body ── */
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.codeLine {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-family: var(--font);
+  line-height: 1.9;
+  padding: 0 6px;
+  white-space: pre;
+}
+
+.indent {
+  /* invisible — just creates the space */
+  color: transparent;
+  user-select: none;
+  white-space: pre;
+}
+
+.codeText {
+  color: var(--text);
+  font-family: var(--font);
+  white-space: pre;
+}
+
+/* ── Blank input fields ── */
+
+.blank {
+  display: inline-block;
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.5);
+  border-bottom: 2px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 0 6px;
+  border-radius: 2px;
+  outline: none;
+  min-width: 36px;
+  max-width: 140px;
+  text-align: center;
+  vertical-align: middle;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.blank:focus {
+  border-color: #fff;
+  border-bottom-color: #fff;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.3);
+  background: rgba(249, 115, 22, 0.12);
+}
+
+.blank::placeholder {
+  color: #2a3a5a;
+  font-style: italic;
+}
+
+/* ── Run button ── */
+
+.btnRun {
+  flex-shrink: 0;
+  margin: 0 10px 10px;
+  padding: 10px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  font-family: var(--font);
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+
+.btnRun:hover:not(:disabled) {
+  background: var(--blue-dim);
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.35);
+}
+
+.btnRun:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

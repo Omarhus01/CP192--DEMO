@@ -1,0 +1,48 @@
+/* ── PhaseIndicator ──────────────────────────────────────────────────────── */
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.stepWrapper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.step {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #2a3a5a;
+  padding: 3px 12px;
+  border-radius: 2px;
+  border: 1px solid transparent;
+}
+
+.active {
+  color: var(--accent);
+  background: rgba(249, 115, 22, 0.08);
+  border-color: rgba(249, 115, 22, 0.25);
+}
+
+.done {
+  color: #3a6a3a;
+}
+
+.check {
+  color: #22c55e;
+}
+
+.arrow {
+  font-size: 9px;
+  color: #2a3a5a;
+  padding: 0 4px;
+}

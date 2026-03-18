@@ -171,3 +171,106 @@
   letter-spacing: 0.5px;
   font-style: italic;
 }
+
+/* ── Column wrappers (for highlight system) ── */
+
+.sceneWrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  position: relative;
+}
+
+.stackWrapper {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  position: relative;
+}
+
+.colHighlighted {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 24px rgba(249, 115, 22, 0.25);
+  border-radius: 4px;
+  animation: pulseBorder 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseBorder {
+  0%,  100% { box-shadow: 0 0 16px rgba(249, 115, 22, 0.15); }
+  50%        { box-shadow: 0 0 36px rgba(249, 115, 22, 0.45); }
+}
+
+/* ── Editor wrapper (flex passthrough + highlight support) ── */
+
+.editorWrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* ── Editor lock overlay (guided phase) ── */
+
+.editorLock {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 8, 28, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  border-radius: 4px;
+}
+
+.lockLabel {
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: #3a4a6a;
+  border: 1px solid #2a3a5a;
+  padding: 6px 16px;
+  border-radius: 2px;
+}
+
+/* ── Guided phase controls ── */
+
+.guidedActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.stepCounter {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.btnNext {
+  width: 100%;
+  padding: 11px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-family: var(--font);
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+
+.btnNext:hover {
+  background: #ea8a2e;
+  box-shadow: 0 2px 12px rgba(249, 115, 22, 0.35);
+}

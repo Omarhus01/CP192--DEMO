@@ -11,6 +11,18 @@ export const level2 = {
   paramName: 'steps',
   initialValue: 5,
 
+  // ── Guided phase ──────────────────────────────────────────────────────────
+  guidedSteps: [
+    { text: "Five steps. Your function climbs one step at a time. Each call handles one step and passes the result up.", highlight: 'scene' },
+    { text: "This time your function needs to return a value. The number of steps climbed. Each clone adds 1 to what the clone below it returned.", highlight: 'callstack' },
+    { text: "Base case: if there is only 1 step left, return 1. Recursive case: return 1 plus climb of steps minus 1. Think about why.", highlight: 'editor' },
+  ],
+
+  scaffoldIntroLine: "You've seen how it works. Fill in the blanks. Four values. Think carefully about what each one should be.",
+  scaffoldTemplate: "if steps <= ___:\n    return ___\nreturn ___ + climb(___)",
+  scaffoldWrongLine: "Check your return values. Each call should return a number, not just True.",
+  freePhaseIntro: "You've seen it. Now do it without the training wheels.",
+
   starterCode: `    # climb(5) should return 5
     # Each recursive call should return a value
     # climb(1) is your base case

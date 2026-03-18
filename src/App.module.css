@@ -1,0 +1,70 @@
+.app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── Top-right mute button ── */
+
+.muteCorner {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 200;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 38px;
+  height: 38px;
+  border-radius: 4px;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  font-family: var(--font);
+}
+
+.muteCorner:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--accent-bg);
+}
+
+/* ── Credits ── */
+
+.credits {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; padding-bottom: 130px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+  background: var(--bg);
+}
+
+.credits h2 {
+  font-size: 32px; color: var(--text);
+  letter-spacing: 4px;
+}
+
+.credits p { font-size: 14px; color: var(--text); }
+.creditsDim { color: var(--text-dim) !important; font-style: italic; }
+.creditsSmall { font-size: 10px !important; color: var(--text-dim) !important; letter-spacing: 1px; }
+
+.creditsBtn {
+  margin-top: 12px;
+  background: var(--blue); color: #fff;
+  font-family: var(--font); font-size: 11px;
+  letter-spacing: 3px; padding: 10px 24px;
+  border-radius: 3px; cursor: pointer;
+  transition: all 0.15s;
+}
+
+.creditsBtn:hover {
+  background: var(--blue-dim);
+  box-shadow: 0 4px 16px rgba(37,99,235,0.3);
+}

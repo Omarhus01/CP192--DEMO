@@ -1,0 +1,174 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  background: #1a0008;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  overflow: hidden;
+  animation: redFlash 0.3s ease-out;
+}
+
+@keyframes redFlash {
+  0%   { background: #ff0033; }
+  100% { background: #1a0008; }
+}
+
+/* Scanline overlay */
+.screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,0,0,0.03) 0px,
+    rgba(255,0,0,0.03) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+  animation: scanlines 8s linear infinite;
+}
+
+@keyframes scanlines {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 40px; }
+}
+
+/* ── Scattered clones ── */
+
+.scatteredClone {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1.5px solid var(--red-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: cloneFlicker 0.3s steps(1) infinite;
+}
+
+@keyframes cloneFlicker {
+  0%   { opacity: 0.8; }
+  33%  { opacity: 0.3; }
+  66%  { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.miniEyes {
+  display: flex;
+  gap: 6px;
+}
+
+.miniEye {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 3px var(--red);
+}
+
+/* ── Main content ── */
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 20px;
+  max-width: 500px;
+}
+
+.errorCode {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--red);
+  background: rgba(255,34,68,0.1);
+  border: 1px solid var(--red-dim);
+  border-radius: 2px;
+  padding: 4px 12px;
+  animation: glitchFlicker 0.4s ease-in-out infinite;
+}
+
+.title {
+  font-size: 26px;
+  color: var(--red);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(255,34,68,0.5);
+  animation: titleGlitch 2s steps(1) infinite;
+}
+
+@keyframes titleGlitch {
+  0%, 90%, 100% { transform: none; filter: none; }
+  91% { transform: translateX(-3px); filter: hue-rotate(90deg); }
+  92% { transform: translateX(3px);  filter: hue-rotate(-45deg); }
+  93% { transform: none; }
+}
+
+.subtitle {
+  font-size: 13px;
+  color: rgba(255,100,100,0.7);
+  line-height: 1.8;
+}
+
+/* ── Stack trace ── */
+
+.stackTrace {
+  width: 100%;
+  background: #0a0005;
+  border: 1px solid var(--red-dim);
+  border-radius: 4px;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.traceHeader {
+  font-size: 10px;
+  color: var(--red-dim);
+  margin-bottom: 6px;
+}
+
+.traceEntry {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  padding: 2px 0;
+  animation: slideIn 0.2s ease-out both;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.traceDepth { color: var(--text-dim); }
+.traceFn    { color: var(--red); }
+.traceDots  { color: var(--red-dim); font-style: italic; }
+
+/* ── Restart button ── */
+
+.restartBtn {
+  margin-top: 8px;
+  background: transparent;
+  border: 1px solid var(--red-dim);
+  color: var(--red);
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: 2px;
+  padding: 10px 28px;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+
+.restartBtn:hover {
+  background: rgba(255,34,68,0.1);
+  border-color: var(--red);
+  box-shadow: 0 0 12px rgba(255,34,68,0.3);
+}

@@ -1,0 +1,178 @@
+.panel {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  font-size: 12px;
+  overflow-y: auto;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sectionLabel {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.required { color: var(--accent); }
+.locked   { color: var(--text-dim); letter-spacing: 0; font-size: 9px; }
+
+/* ── Pseudo-code block ── */
+
+.codeBlock {
+  font-size: 12px;
+  padding: 6px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-dim);
+}
+
+.kw    { color: var(--purple); }
+.fn    { color: var(--cyan); }
+.param { color: var(--yellow); }
+.punct { color: var(--text-dim); }
+
+/* ── Option buttons ── */
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.optionBtn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 7px 10px;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+}
+
+.optionBtn:hover:not(:disabled) {
+  border-color: var(--accent-dim);
+  background: rgba(249,115,22,0.06);
+}
+
+.optionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.optionSelected {
+  border-color: var(--accent) !important;
+  background: rgba(249,115,22,0.1) !important;
+}
+
+.optionCode {
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--cyan);
+}
+
+.optionDesc {
+  font-family: var(--font);
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+/* ── Locked action display ── */
+
+.lockedAction {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  padding: 7px 10px;
+  opacity: 0.7;
+}
+
+/* ── Action buttons ── */
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btnPrimary, .btnSecondary, .btnReset {
+  flex: 1;
+  min-width: 80px;
+  padding: 8px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+}
+
+.btnPrimary {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: #fb923c;
+  box-shadow: 0 0 14px rgba(249,115,22,0.5);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btnDisabled {
+  background: var(--bg-card) !important;
+  color: var(--text-dim) !important;
+  box-shadow: none !important;
+}
+
+.btnSecondary {
+  background: transparent;
+  border: 1px solid var(--purple-dim);
+  color: var(--purple);
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: rgba(167,139,250,0.1);
+  border-color: var(--purple);
+}
+
+.btnSecondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btnReset {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.btnReset:hover:not(:disabled) {
+  border-color: var(--red-dim);
+  color: var(--red);
+}
+
+.btnReset:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

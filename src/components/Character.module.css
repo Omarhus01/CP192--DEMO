@@ -1,0 +1,164 @@
+/* ── Root ── */
+
+.root {
+  position: relative;
+  display: inline-block;
+  transform-origin: bottom center;
+  transition: filter 0.2s;
+}
+
+.flipped { transform: scaleX(-1); }
+
+.svg {
+  width: 40px; height: 72px;
+  overflow: visible;
+  display: block;
+}
+
+/* ── Colours ── */
+
+.skin    { fill: #fcd5a0; }
+.torso   { fill: #e4e9f4; stroke: #c8d0e4; stroke-width: 0.5; }
+.sleeve  { fill: #e4e9f4; stroke: #c8d0e4; stroke-width: 0.5; }
+.pants   { fill: #2563eb; }
+.shoe    { fill: #1e3a8a; }
+.hand    { fill: #fcd5a0; }
+.eyeWhite{ fill: white; }
+.pupil   { fill: #1e1e3f; }
+.shadow  { fill: rgba(0,0,0,0.12); }
+.collar  { fill: white; stroke: #c8d0e4; stroke-width: 0.5; }
+
+/* ── Mouth shapes per state ── */
+
+.mouth_idle    { d: path("M 14 19 Q 20 22 26 19"); stroke: #c07850; }
+.mouth_walk    { d: path("M 14 19 Q 20 22 26 19"); stroke: #c07850; }
+.mouth_jump    { d: path("M 14 18 Q 20 16 26 18"); stroke: #c07850; } /* slight 'O' */
+.mouth_fail    { d: path("M 14 21 Q 20 18 26 21"); stroke: #c07850; } /* frown */
+.mouth_clone   { d: path("M 15 19.5 L 25 19.5");  stroke: #c07850; } /* flat */
+
+/* ── Idle: gentle vertical bob ── */
+
+@keyframes idle_bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}
+
+.char_idle .head  { animation: idle_bob 2.8s ease-in-out infinite; }
+
+/* slight arm sway */
+@keyframes arm_sway {
+  0%, 100% { transform: rotate(0deg);    transform-origin: top center; }
+  50%       { transform: rotate(4deg);   transform-origin: top center; }
+}
+
+.char_idle .armL { animation: arm_sway 2.8s ease-in-out infinite; }
+.char_idle .armR { animation: arm_sway 2.8s ease-in-out infinite reverse; }
+
+/* ── Walk: leg swing ── */
+
+@keyframes leg_walk_L {
+  0%   { transform: rotate(-22deg); transform-origin: top center; }
+  50%  { transform: rotate(22deg);  transform-origin: top center; }
+  100% { transform: rotate(-22deg); transform-origin: top center; }
+}
+
+@keyframes leg_walk_R {
+  0%   { transform: rotate(22deg);  transform-origin: top center; }
+  50%  { transform: rotate(-22deg); transform-origin: top center; }
+  100% { transform: rotate(22deg);  transform-origin: top center; }
+}
+
+@keyframes arm_walk_L {
+  0%   { transform: rotate(20deg);  transform-origin: top center; }
+  50%  { transform: rotate(-20deg); transform-origin: top center; }
+  100% { transform: rotate(20deg);  transform-origin: top center; }
+}
+
+@keyframes arm_walk_R {
+  0%   { transform: rotate(-20deg); transform-origin: top center; }
+  50%  { transform: rotate(20deg);  transform-origin: top center; }
+  100% { transform: rotate(-20deg); transform-origin: top center; }
+}
+
+@keyframes body_walk_bob {
+  0%, 100% { transform: translateY(0); }
+  25%, 75%  { transform: translateY(-2px); }
+}
+
+.char_walk .legL { animation: leg_walk_L 0.52s linear infinite; }
+.char_walk .legR { animation: leg_walk_R 0.52s linear infinite; }
+.char_walk .armL { animation: arm_walk_L 0.52s linear infinite; }
+.char_walk .armR { animation: arm_walk_R 0.52s linear infinite; }
+.char_walk .torso { animation: body_walk_bob 0.52s ease-in-out infinite; }
+
+/* ── Jump ── */
+
+@keyframes leg_jump {
+  0%, 100% { transform: rotate(0deg) translateY(0); transform-origin: top center; }
+  40%       { transform: rotate(-35deg) translateY(-6px); transform-origin: top center; }
+  60%       { transform: rotate(-35deg) translateY(-6px); transform-origin: top center; }
+}
+
+@keyframes arm_jump_L {
+  0%, 100% { transform: rotate(0deg);    transform-origin: top center; }
+  50%       { transform: rotate(-50deg); transform-origin: top center; }
+}
+
+@keyframes arm_jump_R {
+  0%, 100% { transform: rotate(0deg);   transform-origin: top center; }
+  50%       { transform: rotate(50deg); transform-origin: top center; }
+}
+
+@keyframes head_jump {
+  0%, 100% { transform: translateY(0); }
+  40%, 60% { transform: translateY(-5px); }
+}
+
+.char_jump .legL { animation: leg_jump 0.7s ease-in-out; }
+.char_jump .legR { animation: leg_jump 0.7s ease-in-out reverse; }
+.char_jump .armL { animation: arm_jump_L 0.7s ease-in-out; }
+.char_jump .armR { animation: arm_jump_R 0.7s ease-in-out; }
+.char_jump .head { animation: head_jump 0.7s ease-in-out; }
+
+/* ── Fail: head shake + slump ── */
+
+@keyframes head_shake {
+  0%          { transform: rotate(0deg) translateY(0); }
+  15%         { transform: rotate(-8deg) translateY(2px); }
+  30%         { transform: rotate(8deg) translateY(2px); }
+  45%         { transform: rotate(-6deg) translateY(2px); }
+  60%         { transform: rotate(6deg) translateY(2px); }
+  75%, 100%   { transform: rotate(0deg) translateY(4px); }
+}
+
+@keyframes slump {
+  0%, 100% { transform: translateY(0); }
+  70%       { transform: translateY(4px); }
+}
+
+.char_fail .head  { animation: head_shake 0.9s ease-in-out infinite; }
+.char_fail .armL  { transform: rotate(30deg); transform-origin: top center; }
+.char_fail .armR  { transform: rotate(-30deg); transform-origin: top center; }
+.char_fail .torso { animation: slump 0.9s ease-in-out infinite; }
+
+/* ── Clone: glitch flicker ── */
+
+@keyframes glitch_flicker {
+  0%, 89%   { clip-path: none; transform: translateX(0); }
+  90%        { clip-path: inset(20% 0 60% 0); transform: translateX(-3px); }
+  92%        { clip-path: inset(60% 0 20% 0); transform: translateX(3px); }
+  94%        { clip-path: none; transform: translateX(-1px); }
+  96%, 100%  { clip-path: none; transform: translateX(0); }
+}
+
+.char_clone { animation: glitch_flicker 2.4s steps(1) infinite; }
+
+/* Glitch overlay div */
+.glitch {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 30%, rgba(249,115,22,0.06) 50%, transparent 70%);
+  pointer-events: none;
+  animation: glitch_flicker 1.8s steps(1) infinite;
+  border-radius: 4px;
+}

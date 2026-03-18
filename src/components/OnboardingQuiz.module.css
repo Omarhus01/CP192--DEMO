@@ -1,0 +1,73 @@
+.screen {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  padding-bottom: 110px; /* above narrator bar */
+}
+
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 48px 56px;
+  max-width: 520px; width: 100%;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 32px;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.08);
+}
+
+.badge {
+  font-size: 9px; letter-spacing: 3px; font-weight: 700;
+  color: var(--accent); border: 1px solid var(--accent);
+  border-radius: 2px; padding: 3px 10px;
+}
+
+.question {
+  font-size: 36px; font-weight: 700;
+  color: var(--text); text-align: center;
+  letter-spacing: 1px; line-height: 1.2;
+  margin: 0;
+}
+
+.buttons {
+  display: flex; gap: 16px;
+}
+
+.btn {
+  font-family: var(--font); font-size: 14px; font-weight: 700;
+  letter-spacing: 3px; padding: 14px 44px;
+  border-radius: 4px; cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+.btnYes {
+  background: var(--blue); color: #fff;
+  box-shadow: 0 2px 0 var(--blue-dim);
+}
+.btnYes:not(:disabled):hover {
+  background: var(--blue-dim);
+  box-shadow: 0 4px 20px rgba(37,99,235,0.4);
+  transform: translateY(-2px);
+}
+
+.btnNo {
+  background: var(--bg); color: var(--text);
+  border: 1.5px solid var(--border);
+}
+.btnNo:not(:disabled):hover {
+  border-color: var(--text-dim);
+  transform: translateY(-2px);
+}
+
+.waiting {
+  font-size: 10px; letter-spacing: 2px;
+  color: var(--text-dim); font-style: italic;
+}
+
+/* Corner decorations (matching TitleScreen) */
+.cornerTL, .cornerBR { position: fixed; width: 44px; height: 44px; }
+.cornerTL { top: 20px; left: 20px; border-top: 2px solid var(--blue); border-left: 2px solid var(--blue); }
+.cornerBR { bottom: 130px; right: 20px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }

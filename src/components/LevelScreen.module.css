@@ -1,0 +1,173 @@
+.screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 110px;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+  background: var(--bg);
+}
+
+/* ── Header ── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 2px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.levelTag {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 2px;
+  padding: 3px 10px;
+  font-weight: 700;
+}
+
+.levelTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.levelSubtitle {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* ── 3-column layout ── */
+
+.main {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Right panel: editor + buttons ── */
+
+.rightPanel {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btnRun, .btnReset {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 3px;
+  font-family: var(--font);
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.btnRun {
+  background: var(--blue);
+  color: #fff;
+}
+
+.btnRun:hover:not(:disabled) {
+  background: var(--blue-dim);
+  box-shadow: 0 2px 12px rgba(37,99,235,0.35);
+}
+
+.btnRun:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btnReset {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.btnReset:hover:not(:disabled) {
+  border-color: var(--red-dim);
+  color: var(--red);
+}
+
+.btnReset:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btnHint {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 6px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnHint:hover:not(:disabled) {
+  background: var(--accent-bg);
+}
+
+.hintBox {
+  margin-top: 8px;
+  background: #0f0e2e;
+  border: 1px solid var(--accent);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hintLabel {
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.hintCode {
+  font-family: var(--font);
+  font-size: 11px;
+  color: #fcd34d;
+  margin: 0;
+  line-height: 1.9;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.hintNote {
+  font-size: 9px;
+  color: #4a5a7a;
+  letter-spacing: 0.5px;
+  font-style: italic;
+}

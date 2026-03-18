@@ -1,0 +1,177 @@
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding: 12px;
+  min-width: 0;
+}
+
+/* ── Each character row ── */
+
+.characterWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: spawnIn 0.25s ease-out both;
+}
+
+@keyframes spawnIn {
+  from { opacity: 0; transform: scale(0.7) translateY(-8px); }
+  to   { opacity: var(--opacity, 1); transform: scale(1) translateY(0); }
+}
+
+.baseCase .charOuter {
+  border-color: var(--yellow) !important;
+  box-shadow: 0 0 16px rgba(251,191,36,0.35);
+}
+
+.indent { flex-shrink: 0; }
+
+.callLabel {
+  font-size: 10px;
+  color: var(--text-dim);
+  width: 90px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Character face ── */
+/* Depth 0 = orange, deeper = shifts toward purple/cyan */
+
+.charOuter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  transform: scale(var(--scale, 1));
+  transform-origin: left center;
+  filter: blur(var(--blur, 0px)) hue-rotate(var(--hue, 0deg));
+  opacity: var(--opacity, 1);
+  transition: transform 0.3s, filter 0.3s;
+}
+
+.charFace {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  position: relative;
+  box-shadow: 0 0 10px rgba(249,115,22,0.2);
+}
+
+.charEyes { display: flex; gap: 8px; }
+
+.charEye {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text);
+}
+
+.charMouth {
+  width: 14px;
+  height: 3px;
+  background: var(--text-dim);
+  border-radius: 2px;
+}
+
+.charMouthBase {
+  background: var(--yellow);
+  box-shadow: 0 0 4px var(--yellow);
+}
+
+/* ── Gap bar (Level 1) ── */
+
+.gapBar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 80px;
+}
+
+.gapFill {
+  height: 8px;
+  background: var(--border);
+  border-radius: 2px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.gapFill::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: calc(var(--gap, 0) * 20px);
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  max-width: 100%;
+}
+
+.gapLabel {
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+/* ── Step badge (Level 2) ── */
+
+.stepBadge {
+  font-size: 10px;
+  color: var(--cyan);
+  background: rgba(34,211,238,0.08);
+  border: 1px solid var(--cyan-dim);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+/* ── Base case tag ── */
+
+.baseCaseTag {
+  font-size: 9px;
+  color: var(--yellow);
+  background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.3);
+  border-radius: 3px;
+  padding: 2px 6px;
+  letter-spacing: 1px;
+  animation: pulseBc 1s ease-in-out infinite;
+}
+
+@keyframes pulseBc {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ── Success burst ── */
+
+.successBurst {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  color: var(--accent);
+  font-size: 14px;
+  letter-spacing: 2px;
+  animation: successPop 0.5s ease-out both;
+  border: 1px solid var(--accent-dim);
+  border-radius: 4px;
+  background: rgba(249,115,22,0.07);
+  box-shadow: 0 0 30px rgba(249,115,22,0.15);
+}
+
+@keyframes successPop {
+  0%   { opacity: 0; transform: scale(0.8); }
+  60%  { transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}

@@ -1,0 +1,106 @@
+.box {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  background: var(--bg-dark);
+  border-top: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  z-index: 100;
+}
+
+/* ── Portrait ── */
+
+.portrait {
+  flex-shrink: 0;
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.portraitFace {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #1a1530;
+  border: 2px solid var(--accent-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.portrait_neutral  .portraitFace { border-color: var(--accent-dim); box-shadow: 0 0 10px rgba(249,115,22,0.2); }
+.portrait_stressed .portraitFace { border-color: var(--yellow); box-shadow: 0 0 14px rgba(217,119,6,0.3); animation: wobble 1.2s ease-in-out infinite; }
+.portrait_gone     .portraitFace { border-color: var(--red-dim); background: #1a0510; }
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(0); }
+  25%       { transform: rotate(-1.5deg); }
+  75%       { transform: rotate(1.5deg); }
+}
+
+.eyes { display: flex; gap: 10px; }
+.eye  { width: 7px; height: 7px; border-radius: 50%; background: var(--text-inv); }
+.eyeStressed { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
+
+.mouth_neutral  { width: 18px; height: 3px; background: #4a5a7a; border-radius: 2px; }
+.mouth_stressed { width: 16px; height: 8px; border: 2px solid var(--yellow); border-radius: 2px; background: transparent; }
+
+.static {
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 3px);
+  animation: staticFlicker 0.15s steps(1) infinite;
+}
+
+@keyframes staticFlicker {
+  0%   { opacity: 0.6; filter: hue-rotate(0deg); }
+  25%  { opacity: 1;   filter: hue-rotate(45deg); }
+  50%  { opacity: 0.7; filter: hue-rotate(-20deg); }
+  75%  { opacity: 1;   filter: hue-rotate(90deg); }
+  100% { opacity: 0.8; }
+}
+
+.portraitLabel {
+  font-size: 8px; color: #4a5a7a; text-align: center;
+  letter-spacing: 0.5px; line-height: 1.2; white-space: nowrap;
+}
+
+/* ── Dialogue ── */
+
+.dialogue {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-inv);
+  line-height: 1.5;
+  min-height: 2em;
+  display: flex;
+  align-items: center;
+}
+
+.typewriter { display: inline; }
+.cursor { display: inline-block; animation: blink 0.8s step-start infinite; color: var(--accent); }
+.idle   { color: #3a4a6a; animation: blink 2s ease-in-out infinite; }
+
+/* ── Mute button (in the bar) ── */
+
+.muteBtn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid #2a3a5a;
+  color: #4a5a7a;
+  width: 36px; height: 36px;
+  border-radius: 4px; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.muteBtn:hover { border-color: var(--accent); color: var(--text-inv); }

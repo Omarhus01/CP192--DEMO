@@ -1,0 +1,65 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Locked function signature ── */
+
+.signature {
+  padding: 9px 14px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font);
+  font-size: 13px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.kw    { color: var(--blue);    font-weight: 700; }
+.fn    { color: var(--accent);  }
+.param { color: var(--yellow);  }
+.punct { color: var(--text-dim);}
+
+/* ── CodeMirror container ── */
+
+.editor {
+  flex: 1;
+  overflow: hidden;
+  min-height: 120px;
+  max-height: 280px;
+}
+
+.editorDisabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ── Closing brace ── */
+
+.closingBrace {
+  padding: 6px 14px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  font-family: var(--font);
+  font-size: 13px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* ── Error banner ── */
+
+.errorBanner {
+  padding: 6px 14px;
+  background: #fef2f2;
+  border-bottom: 1px solid #fca5a5;
+  color: var(--red);
+  font-size: 11px;
+  font-family: var(--font);
+  flex-shrink: 0;
+}

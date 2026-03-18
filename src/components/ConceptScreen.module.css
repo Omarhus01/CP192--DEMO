@@ -1,0 +1,177 @@
+.screen {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 28px;
+  padding: 24px 32px 140px;
+  background: var(--bg);
+  position: relative;
+}
+
+/* ── Progress ── */
+
+.progress {
+  display: flex; gap: 8px; align-items: center;
+}
+
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border);
+  transition: background 0.3s, transform 0.3s;
+}
+
+.dotActive {
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+/* ── Step label ── */
+
+.stepLabel {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.stepNum {
+  font-size: 10px; letter-spacing: 2px; color: var(--text-dim);
+}
+
+.stepTitle {
+  font-size: 11px; letter-spacing: 3px; font-weight: 700;
+  color: var(--accent); text-transform: uppercase;
+}
+
+/* ── Step body ── */
+
+.stepBody {
+  width: 100%; max-width: 640px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 240px;
+}
+
+.stepContent {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 20px;
+  width: 100%;
+}
+
+/* ── Problem boxes ── */
+
+.problemChain {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+}
+
+.problemBox {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border);
+  border-left: 4px solid var(--blue);
+  border-radius: 4px;
+  font-family: var(--font);
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.problemLit {
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.bigProblem {
+  font-size: 28px; font-weight: 700; font-family: var(--font);
+  color: var(--text);
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-left: 5px solid var(--blue);
+  border-radius: 6px;
+  padding: 20px 36px;
+  letter-spacing: 2px;
+}
+
+.tooBig {
+  font-size: 11px; color: var(--text-dim); letter-spacing: 1px;
+}
+
+.hint {
+  font-size: 11px; color: var(--text-dim); letter-spacing: 1px;
+  font-style: italic;
+}
+
+.baseCase {
+  font-size: 11px; letter-spacing: 1px; font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: 3px; padding: 6px 14px;
+}
+
+/* ── Code block (step 5) ── */
+
+.codeBlock {
+  background: #0f0e2e;
+  border-radius: 6px;
+  padding: 24px 28px;
+  width: 100%; max-width: 540px;
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 2;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+}
+
+.codeLine { white-space: pre; }
+
+.code_def     { color: #93c5fd; }
+.code_base    { color: #6ee7b7; }
+.code_return  { color: #fca5a5; }
+.code_recurse { color: #fcd34d; }
+
+/* ── Final step ── */
+
+.finalStep {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 16px;
+  text-align: center;
+}
+
+.finalIcon { font-size: 48px; }
+
+.finalText {
+  font-size: 16px; color: var(--text);
+  line-height: 1.7; max-width: 360px; margin: 0;
+}
+
+/* ── Navigation ── */
+
+.nextBtn {
+  font-family: var(--font); font-size: 12px; font-weight: 700;
+  letter-spacing: 3px; padding: 12px 32px;
+  border-radius: 4px; cursor: pointer;
+  background: var(--bg-secondary);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  transition: all 0.15s;
+}
+
+.nextBtn:hover {
+  border-color: var(--text-dim);
+}
+
+.beginBtn {
+  background: var(--blue); color: #fff; border-color: var(--blue);
+  box-shadow: 0 2px 0 var(--blue-dim);
+}
+
+.beginBtn:hover {
+  background: var(--blue-dim); border-color: var(--blue-dim);
+  box-shadow: 0 4px 20px rgba(37,99,235,0.4);
+}
+
+/* ── Corners ── */
+
+.cornerTL, .cornerBR { position: fixed; width: 44px; height: 44px; }
+.cornerTL { top: 20px; left: 20px; border-top: 2px solid var(--blue); border-left: 2px solid var(--blue); }
+.cornerBR { bottom: 130px; right: 20px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }

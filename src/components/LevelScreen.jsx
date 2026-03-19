@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useRef } from 'react'
+import { useReducer, useEffect, useRef, useState } from 'react'
 import SceneView       from './SceneView.jsx'
 import CallStackPanel  from './CallStackPanel.jsx'
 import CodeEditor      from './CodeEditor.jsx'
@@ -10,6 +10,14 @@ import { didIgnoreCallStack, getIdleTrigger, outcomeToNarratorTrigger } from '..
 import { getLine, getExpression, speak, getSyntaxRepeatLine, LINES } from '../systems/narratorSystem.js'
 import { playSpawnSound, playSuccessSound, playOverflowSound, playNarratorClick } from '../systems/audioSystem.js'
 import styles from './LevelScreen.module.css'
+
+// ── Speed config ──────────────────────────────────────────────────────────────
+
+const SPEED_CONFIG = {
+  slow:   { spawnDelay: 1200, returnDelay: 1200, baseCasePause: 1200, baseCaseNarratorDelay: 800 },
+  normal: { spawnDelay: 650,  returnDelay: 430,  baseCasePause: 800,  baseCaseNarratorDelay: 380 },
+  fast:   { spawnDelay: 300,  returnDelay: 300,  baseCasePause: 400,  baseCaseNarratorDelay: 200 },
+}
 
 // ── Reducer ───────────────────────────────────────────────────────────────────
 
@@ -38,7 +46,7 @@ function reducer(state, action) {
     case 'START_ANIM':     return { ...state, phase: 'animating', callStack: [], clones: [], animSteps: action.steps, stepIndex: 0, characterAtEnd: false, errorLine: null }
     case 'PUSH_CALL':      return { ...state, callStack: [...state.callStack, { depth: action.depth, label: action.label, status: 'active' }], clones: [...state.clones, { depth: action.depth, label: action.label, value: action.value, isBase: false }] }
     case 'MARK_BASE':      return { ...state, callStack: state.callStack.map((e,i) => i === state.callStack.length-1 ? {...e, status:'baseCase'} : e), clones: state.clones.map((c,i) => i === state.clones.length-1 ? {...c, isBase:true} : c) }
-    case 'MARK_RETURN':    return { ...state, callStack: state.callStack.map(e => e.depth===action.depth ? {...e,status:'returning'} : e) }
+    case 'MARK_RETURN':    return { ...state, callStack: state.callStack.map(e => e.depth===action.depth ? {...e,status:'returning'} : e), clones: state.clones.map(c => c.depth===action.depth ? {...c, isReturning:true, returnValue:action.value} : c) }
     case 'POP_DEPTH':      return { ...state, callStack: state.callStack.filter(e=>e.depth!==action.depth), clones: state.clones.filter(c=>c.depth!==action.depth) }
     case 'ADVANCE_STEP':   return { ...state, stepIndex: state.stepIndex + 1 }
     case 'SET_PHASE':      return { ...state, phase: action.payload }
@@ -62,6 +70,7 @@ export default function LevelScreen({
   onNarratorLine, onOverflow, onLevelComplete, onWrongAttempt,
 }) {
   const [state, dispatch] = useReducer(reducer, level, makeInitial)
+  const [speed, setSpeed] = useState('slow')
 
   const animTimerRef      = useRef(null)
   const simResultRef      = useRef(null)
@@ -78,11 +87,13 @@ export default function LevelScreen({
   const lineTrackerRef    = useRef(lineTracker)
   const isMutedRef        = useRef(isMuted)
   const onNarratorLineRef = useRef(onNarratorLine)
+  const speedRef          = useRef(speed)
   stateRef.current          = state
   narratorStateRef.current  = narratorState
   lineTrackerRef.current    = lineTracker
   isMutedRef.current        = isMuted
   onNarratorLineRef.current = onNarratorLine
+  speedRef.current          = speed
 
   // ── Narrator helper ─────────────────────────────────────────────────────────
 
@@ -139,16 +150,30 @@ export default function LevelScreen({
 
   // ── Animation engine ────────────────────────────────────────────────────────
 
+  function getStepDelay(step) {
+    if (!step) return 320
+    const cfg = SPEED_CONFIG[speedRef.current]
+    switch (step.type) {
+      case 'call':     return cfg.spawnDelay
+      case 'return':   return cfg.returnDelay
+      case 'baseCase': return 200   // quick to render; internal pause follows inside processStep
+      default:         return 320
+    }
+  }
+
   useEffect(() => {
     if (state.phase !== 'animating') return
     if (state.stepIndex >= state.animSteps.length) return
 
     clearTimeout(animTimerRef.current)
+    const nextStep = state.animSteps[state.stepIndex]
+    const delay    = getStepDelay(nextStep)
+
     animTimerRef.current = setTimeout(() => {
       const s = stateRef.current
       const step = s.animSteps[s.stepIndex]
       if (step) processStep(step)
-    }, 560)
+    }, delay)
 
     return () => clearTimeout(animTimerRef.current)
   }, [state.phase, state.stepIndex]) // eslint-disable-line
@@ -161,16 +186,27 @@ export default function LevelScreen({
         dispatch({ type: 'ADVANCE_STEP' })
         break
 
-      case 'baseCase':
+      case 'baseCase': {
         dispatch({ type: 'MARK_BASE' })
-        dispatch({ type: 'ADVANCE_STEP' })
+        // Dramatic pause — deepest clone glows, stack entry turns green
+        // Then narrator fires, then results start bubbling
+        const cfg = SPEED_CONFIG[speedRef.current]
+        setTimeout(() => {
+          fireNarrator('baseCaseHit')
+          setTimeout(() => dispatch({ type: 'ADVANCE_STEP' }), cfg.baseCaseNarratorDelay)
+        }, cfg.baseCasePause)
+        // No immediate ADVANCE_STEP — timeout above handles it
         break
+      }
 
-      case 'return':
-        dispatch({ type: 'MARK_RETURN', depth: step.depth })
-        setTimeout(() => dispatch({ type: 'POP_DEPTH', depth: step.depth }), 320)
+      case 'return': {
+        dispatch({ type: 'MARK_RETURN', depth: step.depth, value: step.value })
+        // Hold the returning state so player can see the green flash
+        const retDelay = SPEED_CONFIG[speedRef.current].returnDelay
+        setTimeout(() => dispatch({ type: 'POP_DEPTH', depth: step.depth }), retDelay)
         dispatch({ type: 'ADVANCE_STEP' })
         break
+      }
 
       case 'overflow':
         dispatch({ type: 'SET_PHASE', payload: 'done' })
@@ -189,9 +225,10 @@ export default function LevelScreen({
         const outcome = simResultRef.current?.outcome
         dispatch({ type: 'SET_PHASE', payload: 'done' })
         if (outcome === 'success') {
-          dispatch({ type: 'CHAR_AT_END' })
           playSuccessSound(isMutedRef.current)
-          handleSuccess()
+          // Character only moves after all clones have resolved and disappeared
+          setTimeout(() => dispatch({ type: 'CHAR_AT_END' }), 550)
+          setTimeout(() => handleSuccess(), 750)
         } else {
           handleWrongResult(outcome)
         }
@@ -367,8 +404,8 @@ export default function LevelScreen({
   function handleWrongResult(outcome) {
     // ── Scaffold phase: don't escalate narrator, just give scaffold hint ───
     if (stateRef.current.levelPhase === 'scaffold') {
-      document.body.classList.add('shake')
-      setTimeout(() => document.body.classList.remove('shake'), 450)
+      const scene = document.getElementById('puzzle-scene')
+      if (scene) { scene.classList.add('wrongShake'); setTimeout(() => scene.classList.remove('wrongShake'), 250) }
       fireScaffoldLine(level.scaffoldWrongLine ?? "Not quite. Check your blanks.")
       setTimeout(() => { dispatch({ type: 'RESET', level }); simResultRef.current = null }, 2400)
       return
@@ -379,8 +416,8 @@ export default function LevelScreen({
     dispatch({ type: 'WRONG_STREAK' })
     const trigger = outcomeToNarratorTrigger(outcome, false)
     fireNarrator(trigger)
-    document.body.classList.add('shake')
-    setTimeout(() => document.body.classList.remove('shake'), 450)
+    const scene = document.getElementById('puzzle-scene')
+    if (scene) { scene.classList.add('wrongShake'); setTimeout(() => scene.classList.remove('wrongShake'), 250) }
     setTimeout(() => { dispatch({ type: 'RESET', level }); simResultRef.current = null }, 2400)
   }
 
@@ -403,6 +440,21 @@ export default function LevelScreen({
           <span className={styles.levelTitle}>{level.title}</span>
         </div>
         <span className={styles.levelSubtitle}>{level.subtitle}</span>
+        <div className={styles.speedControl}>
+          <div className={styles.speedLabel}>SPEED</div>
+          <div className={styles.speedBtns}>
+            {['slow', 'normal', 'fast'].map(s => (
+              <button
+                key={s}
+                className={`${styles.speedBtn} ${speed === s ? styles.speedBtnActive : ''}`}
+                onClick={() => setSpeed(s)}
+                disabled={isAnimBusy}
+              >
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* ── Phase indicator ── */}
@@ -450,6 +502,7 @@ export default function LevelScreen({
                   onChange={code => dispatch({ type: 'SET_CODE', payload: code })}
                   disabled={state.levelPhase === 'guided' || state.phase === 'animating'}
                   errorLine={state.errorLine}
+                  resetKey={`${state.levelPhase}-${state.resetCount}`}
                 />
                 {state.levelPhase === 'guided' && (
                   <div className={styles.editorLock}>

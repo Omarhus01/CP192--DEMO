@@ -34,6 +34,24 @@
   background: var(--accent-bg);
 }
 
+/* ── Screen crossfade overlay ── */
+
+.fadeOverlay {
+  position: fixed;
+  inset: 0;
+  background: #0f0e2e;
+  z-index: 998;
+  pointer-events: none;
+  animation: fadeOverlayPulse 1.0s ease-in-out forwards;
+}
+
+@keyframes fadeOverlayPulse {
+  0%   { opacity: 0; }
+  45%  { opacity: 1; }
+  55%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* ── Credits ── */
 
 .credits {

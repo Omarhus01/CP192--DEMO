@@ -31,10 +31,24 @@ export default function App() {
   const [narratorState,  setNarratorState]   = useState(INITIAL_NARRATOR)
   const [lineTracker,    setLineTracker]      = useState({})
   const [narratorLine,   setNarratorLine]    = useState(null)
-  const [completionData, setCompletionData]  = useState(null)
+  const [completionData,    setCompletionData]    = useState(null)
+  const [transitioning,     setTransitioning]     = useState(false)
+  const [conceptExpression, setConceptExpression] = useState(null)
 
-  const currentLevel = LEVELS[levelIndex]
-  const startingRef = useRef(false)
+  const currentLevel      = LEVELS[levelIndex]
+  const startingRef       = useRef(false)
+  const pendingScreenRef  = useRef(null)
+  const lastNarratorTime  = useRef(0)
+
+  // ── Screen crossfade helper ────────────────────────────────────────────────
+  function navigateTo(newScreen) {
+    pendingScreenRef.current = newScreen
+    setTransitioning(true)
+    setTimeout(() => {
+      setScreen(pendingScreenRef.current)
+      setTransitioning(false)
+    }, 500)
+  }
 
   // ── Glitch level ──────────────────────────────────────────────────────────────
   const glitchLevel =
@@ -63,10 +77,26 @@ export default function App() {
   // ── Mute sync ─────────────────────────────────────────────────────────────────
   useEffect(() => { setMusicMuted(isMuted) }, [isMuted])
 
-  // ── Narrator line callback ────────────────────────────────────────────────────
+  // ── Clear concept expression when leaving concept screen ──────────────────────
+  useEffect(() => {
+    if (screen !== 'concept') setConceptExpression(null)
+  }, [screen])
+
+  // ── Narrator line callback — min 300ms between lines ─────────────────────────
   const handleNarratorLine = useCallback((text, nextTracker) => {
-    setNarratorLine(text)
-    if (nextTracker) setLineTracker(nextTracker)
+    const now     = Date.now()
+    const elapsed = now - lastNarratorTime.current
+    const delay   = elapsed < 300 ? 300 - elapsed : 0
+    lastNarratorTime.current = now + delay
+    if (delay > 0) {
+      setTimeout(() => {
+        setNarratorLine(text)
+        if (nextTracker) setLineTracker(nextTracker)
+      }, delay)
+    } else {
+      setNarratorLine(text)
+      if (nextTracker) setLineTracker(nextTracker)
+    }
   }, [])
 
   // ── Quiz answer ───────────────────────────────────────────────────────────────
@@ -78,7 +108,7 @@ export default function App() {
       const text = LINES.quizYes[0]
       setNarratorLine(text)
       await speak(text, isMuted)
-      setScreen('concept')
+      navigateTo('concept')
     } else {
       const text1 = LINES.quizNo1[0]
       setNarratorLine(text1)
@@ -88,14 +118,14 @@ export default function App() {
         const text2 = LINES.quizNo2[0]
         setNarratorLine(text2)
         speak(text2, isMuted)
-        setTimeout(() => setScreen('concept'), 2500)
+        setTimeout(() => navigateTo('concept'), 2500)
       }, 3000)
     }
   }
 
   // ── Concept screen done ───────────────────────────────────────────────────────
   function handleConceptDone() {
-    setScreen('title')
+    navigateTo('title')
   }
 
   // ── Title → Level 1 ───────────────────────────────────────────────────────────
@@ -107,7 +137,7 @@ export default function App() {
     setLineTracker(nextTracker)
     playNarratorClick(isMuted)
     await speak(text, isMuted)
-    setScreen('level')
+    navigateTo('level')
   }
 
   // ── In-level callbacks ────────────────────────────────────────────────────────
@@ -117,7 +147,7 @@ export default function App() {
 
   function handleOverflow() {
     setNarratorState(prev => ({ ...prev, attemptCount: prev.attemptCount + 1 }))
-    setScreen('overflow')
+    navigateTo('overflow')
   }
 
   function handleLevelComplete(data) {
@@ -132,7 +162,7 @@ export default function App() {
         unrecognizedSolutionsFound: [...prev.unrecognizedSolutionsFound, data.outcome],
       }))
     }
-    setScreen('levelComplete')
+    navigateTo('levelComplete')
   }
 
   function handleNextLevel() {
@@ -146,14 +176,14 @@ export default function App() {
       }
       setNarratorState(prev => ({ ...prev, attemptCount: 0 }))
       setLevelIndex(next)
-      setScreen('level')
+      navigateTo('level')
     } else {
-      setScreen('credits')
+      navigateTo('credits')
     }
   }
 
   function handleRestartFromOverflow() {
-    setScreen('level')
+    navigateTo('level')
   }
 
   const expression = getExpression(narratorState)
@@ -179,6 +209,7 @@ export default function App() {
           isMuted={isMuted}
           onComplete={handleConceptDone}
           setNarratorLine={setNarratorLine}
+          onExpressionChange={setConceptExpression}
         />
       )}
 
@@ -217,20 +248,25 @@ export default function App() {
         <CreditsScreen
           isMuted={isMuted}
           onPlayAgain={() => {
-            setScreen('title')
+            startingRef.current = false   // allow handleStart to fire again
             setLevelIndex(0)
             setNarratorState(INITIAL_NARRATOR)
             setLineTracker({})
             setNarratorLine(null)
+            navigateTo('title')
           }}
         />
       )}
+
+      {/* ── Crossfade overlay for screen transitions ── */}
+      {transitioning && <div className={styles.fadeOverlay} />}
 
       {/* Narrator bar — everywhere except overflow and credits (credits has its own) */}
       {screen !== 'overflow' && screen !== 'credits' && (
         <NarratorBox
           line={narratorLine}
           expression={expression}
+          expressionOverride={conceptExpression}
           isMuted={isMuted}
           onToggleMute={() => setIsMuted(m => !m)}
         />

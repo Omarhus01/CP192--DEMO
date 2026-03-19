@@ -26,11 +26,11 @@ export default function CallStackPanel({ entries, functionName, onInteract }) {
           <div className={styles.empty}>// awaiting execution</div>
         ) : (
           // Show deepest call at top (most recent first — like a real call stack)
+          // key includes status so re-mount fires the correct animation per state
           [...entries].reverse().map((entry, i) => (
             <div
-              key={`${entry.depth}-${entry.label}`}
-              className={`${styles.entry} ${STATUS_CLASS[entry.status] || styles.entryActive} fadeIn`}
-              style={{ animationDelay: `${i * 30}ms` }}
+              key={`${entry.depth}-${entry.status}`}
+              className={`${styles.entry} ${STATUS_CLASS[entry.status] || styles.entryActive}`}
             >
               <span className={styles.statusIcon}>
                 {STATUS_LABEL[entry.status] || '▶'}
@@ -43,7 +43,10 @@ export default function CallStackPanel({ entries, functionName, onInteract }) {
       </div>
 
       <div className={styles.footer}>
-        depth: {entries.length} / 8
+        {/* key={entries.length} forces re-mount (and tick animation) on depth change */}
+        <span key={entries.length} className={styles.depthCount}>
+          depth: {entries.length} / 8
+        </span>
         <div
           className={styles.depthBar}
           style={{ '--fill': `${(entries.length / 8) * 100}%` }}

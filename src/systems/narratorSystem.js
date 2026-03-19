@@ -56,13 +56,13 @@ export const LINES = {
   ],
 
   level1Intro: [
-    "There is a gap. There is a coin. You have the ability to write a function that calls itself. Figure it out.",
-    "Objective: retrieve the coin. Write the function body. Run it. Try not to destroy the call stack.",
+    "The elevator is broken. Five floors. Your function handles one floor at a time and asks a clone to handle the rest. Write the base case and the recursive call.",
+    "Objective: reach the top floor. climb(5) calls climb(4), which calls climb(3)... until the base case. Then they all return. Try not to destroy the call stack.",
   ],
 
   level2Intro: [
-    "Stairs this time. Five of them. Your function needs to return a value now. Don't skip that part.",
-    "Level Two. Each recursive call should hand something back. A number. The number of steps climbed. It's not complicated. It becomes complicated.",
+    "Five coins. You can only pick up one at a time. Your function picks one up and asks a clone to count the rest. Then it adds 1 to what the clone returns.",
+    "Level Two. count(coins) should return the total number of coins. Each call returns 1 plus count of coins minus one. The base case returns zero. Pay attention to what travels back up.",
   ],
 
   level2AfterPerfectRun: [
@@ -79,6 +79,13 @@ export const LINES = {
     "At this point the clones have formed a union. They are demanding better working conditions. This is your fault.",
   ],
 
+  baseCaseHit: [
+    "There. Base case. Recursion stops here.",
+    "That's as far down as it goes. Now it unwinds.",
+    "Floor reached. The chain reverses.",
+    "Base case triggered. Pay attention to what happens next.",
+  ],
+
   noBaseCaseRepeat: [
     "We have been here before. Multiple times. The outcome does not change.",
     "Same result. Same error. Same face I'm making right now.",
@@ -92,15 +99,15 @@ export const LINES = {
   ],
 
   wrongResult: [
-    "The function terminated but returned the wrong value. climb(5) should return 5. It returned something else. I'm not going to tell you what.",
+    "The function terminated but returned the wrong value. count(5) should return 5. It returned something else. I'm not going to tell you what.",
     "Wrong output. The chain resolved but the numbers don't add up. Check what you're returning at each step.",
     "Close. Not correct. The clones did their best. They were let down by the arithmetic.",
   ],
 
   wrongDepth: [
-    "You stopped at the wrong step. The character is halfway up the staircase. Looking confused. Same as me.",
-    "That base case fired too early. The chain resolved before reaching the top. I count five steps. You reached three.",
-    "Close. Not correct. The base case triggered prematurely.",
+    "You stopped at the wrong coin. The base case fired before the coin stack was empty. I count five coins. You stopped early.",
+    "That base case fired too early. The chain resolved before all coins were counted.",
+    "Close. Not correct. The base case triggered before the coin stack reached zero.",
   ],
 
   syntaxError: [
@@ -254,12 +261,24 @@ export const FINALE_LINES = [
 let currentAudio = null;
 
 export async function speak(text, isMuted, attemptCount = 0, voiceSettings = null) {
-  if (isMuted) return;
+  console.log('[speak] called:', {
+    text:            text?.slice(0, 60),
+    isMuted,
+    hasCurrentAudio: !!currentAudio,
+    audioEnded:      currentAudio?.ended ?? 'n/a',
+  });
+
+  if (isMuted) { console.log('[speak] bailed: isMuted=true'); return; }
+
+  // Cancel any currently-playing audio
   if (currentAudio) {
+    currentAudio.onended = null;   // detach handlers before cancelling
+    currentAudio.onerror = null;
     currentAudio.pause();
     currentAudio.src = '';
     currentAudio = null;
   }
+
   const settings = voiceSettings ?? getVoiceSettings(attemptCount);
   try {
     const response = await fetch(
@@ -279,20 +298,47 @@ export async function speak(text, isMuted, attemptCount = 0, voiceSettings = nul
     );
     if (!response.ok) {
       const errText = await response.text();
-      console.error("ElevenLabs HTTP error:", response.status, errText);
+      console.error('[speak] ElevenLabs HTTP error:', response.status, errText);
       return;
     }
     const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
+    const url  = URL.createObjectURL(blob);
+
+    // Check if a newer speak() cancelled us while we were fetching
+    if (currentAudio !== null) {
+      console.log('[speak] preempted by newer call while fetching — discarding');
+      URL.revokeObjectURL(url);
+      return;
+    }
+
     currentAudio = new Audio(url);
+    console.log('[speak] playing audio for:', text?.slice(0, 40));
+
     await new Promise((resolve) => {
-      currentAudio.onended = resolve;
-      currentAudio.onerror = resolve;
-      currentAudio.play();
+      const audio = currentAudio; // capture ref — may be nulled by a concurrent speak()
+      audio.onended = () => {
+        console.log('[speak] audio ended naturally:', text?.slice(0, 40));
+        if (currentAudio === audio) currentAudio = null;  // clear only if still ours
+        URL.revokeObjectURL(url);
+        resolve();
+      };
+      audio.onerror = (e) => {
+        console.warn('[speak] audio error event:', e?.message ?? e, 'text:', text?.slice(0, 40));
+        if (currentAudio === audio) currentAudio = null;
+        URL.revokeObjectURL(url);
+        resolve();
+      };
+      audio.play().catch((e) => {
+        console.warn('[speak] play() rejected:', e?.message ?? e, 'text:', text?.slice(0, 40));
+        if (currentAudio === audio) currentAudio = null;
+        URL.revokeObjectURL(url);
+        resolve();
+      });
     });
+
     await new Promise(r => setTimeout(r, 300));
   } catch (err) {
-    console.error("ElevenLabs error:", err);
+    console.error('[speak] caught exception:', err);
   }
 }
 

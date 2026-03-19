@@ -1,50 +1,47 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  level1.js — "The Simple Job"
+//  level1.js — "The Floors"
 //  Teaches: base case
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const level1 = {
   id: 1,
-  title: 'The Simple Job',
-  subtitle: 'Get to the coin.',
-  functionName: 'solve',
-  paramName: 'gap',
-  initialValue: 4,
+  title: 'The Floors',
+  subtitle: 'The elevator is broken.',
+  functionName: 'climb',
+  paramName: 'floors',
+  initialValue: 5,
 
   // ── Guided phase ──────────────────────────────────────────────────────────
   guidedSteps: [
-    { text: "Look at the gap. The character cannot jump it alone. The gap is too large.", highlight: 'scene' },
-    { text: "You will write a function called solve. It takes the gap size as input. Your job is to make the character reach the other side.", highlight: 'editor' },
-    { text: "Watch this panel. Every time your function calls itself, a new entry appears here. This is the call stack. It is important. Look at it.", highlight: 'callstack' },
-    { text: "There are two things your function needs. A stopping condition — when the gap is small enough to jump directly. And a recursive call — for when it isn't. You will write both.", highlight: null },
+    { text: "The elevator is broken. The character is at the bottom and needs to reach the top floor. They can only climb one floor at a time.", highlight: 'scene' },
+    { text: "You will write a function called climb. It takes the number of floors remaining. Your job is to make the character reach the top.", highlight: 'editor' },
+    { text: "Watch this panel as your function runs. Every recursive call adds an entry here. This is the call stack. climb(5) calls climb(4), which calls climb(3)... look at it.", highlight: 'callstack' },
+    { text: "Your function needs two things: a stopping condition — when floors is small enough to climb directly — and a recursive call that handles one floor and passes the rest to a clone.", highlight: null },
   ],
 
-  scaffoldIntroLine: "Good. You understand the problem. Now try filling in the blanks. The function is mostly there — you just need to provide two values.",
-  scaffoldTemplate: "if gap <= ___:\n    return True\nreturn solve(___)",
-  scaffoldWrongLine: "Not quite. The first blank is the threshold — when is the gap small enough? The second blank is the smaller version of the problem.",
+  scaffoldIntroLine: "Good. Now fill in the blanks. Two values. When is the floor count small enough? What do you pass to the clone?",
+  scaffoldTemplate: "if floors <= ___:\n    return True\nreturn climb(___)",
+  scaffoldWrongLine: "Not quite. First blank: the threshold — when is it close enough to climb directly? Second blank: the smaller problem you hand to the clone.",
   freePhaseIntro: "Good. Now write it yourself. From scratch. No hints.",
 
-  // Pre-filled in the editor (read-only signature, editable body)
-  starterCode: `    # When is the gap small enough to jump?
-    # When it isn't, what should the clone do?
+  starterCode: `    # When is the floor count small enough to climb directly?
+    # What should the clone handle?
     pass
 `,
 
   successExplanation: `You just used recursion.
 
-Each clone handled a slightly smaller version of the same problem — gap minus one — until the gap was small enough to jump across.
+Each clone handled a slightly smaller version of the same problem — floors minus one — until the floor count was small enough to climb directly.
 
-That stopping condition ("when gap ≤ 1, return") is called the **base case**. Without it, the clones would never stop spawning.
+That stopping condition ("when floors ≤ 1, return True") is the **base case**. Without it, the clones never stop spawning.
 
-The function called itself with a smaller input, until it hit the base case. That's recursion.`,
+The function called itself with a smaller input each time, until it hit the base case. That's recursion.`,
 
-  hint: `    if gap <= ___:   # when is the gap small enough?
-        return
-    solve(gap - ___)  # what do you pass to the next clone?`,
+  hint: `    if floors <= ___:   # when is it close enough?
+        return True
+    climb(floors - ___)  # what do you pass to the next clone?`,
 
   scene: {
-    gapSize: 4,
-    characterLabel: 'YOU',
-    goalLabel: '🪙',
+    floorCount: 5,
   },
 }

@@ -63,15 +63,15 @@ __calls = [0]
 __depth = [0]
 __steps = []
 
-def ${functionName}(*args, **kwargs):
+def ${functionName}(${paramName}):
     __calls[0] += 1
     if __calls[0] > ${MAX_CALLS}:
         raise RecursionError("Max recursive calls exceeded")
     __depth[0] += 1
     d   = __depth[0] - 1
-    val = args[0] if args else None
+    val = ${paramName}
     __steps.append({"type": "call", "depth": d, "label": "${functionName}(" + str(val) + ")", "value": val})
-    result = __orig(*args, **kwargs)
+    result = __orig(${paramName})
     __depth[0] -= 1
     __steps.append({"type": "return", "depth": d, "value": result})
     return result

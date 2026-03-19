@@ -138,6 +138,61 @@
   bottom: 0;
 }
 
+/* Inner spawn-animation wrapper — separated from translateX so keyframes don't fight */
+.cloneSpawnAnim {
+  position: relative;
+  animation: cloneSpawn 0.65s ease-out both;
+}
+
+/* Base case: white pulse glow */
+.baseCaseClone {
+  animation: baseCasePulseLocal 1.2s ease-in-out 1 !important;
+}
+
+@keyframes baseCasePulseLocal {
+  0%,  100% { filter: none; }
+  40%        { filter: drop-shadow(0 0 18px #fff) drop-shadow(0 0 36px rgba(255,255,255,0.55)) brightness(1.6); }
+  70%        { filter: drop-shadow(0 0 10px rgba(255,255,255,0.4)); }
+}
+
+/* Returning: green glow then fade — child selector (wrapper pattern) */
+.cloneReturning .cloneSpawnAnim,
+.cloneReturning .cloneJumpAnim {
+  animation: returnGlowLocal 0.45s ease-out forwards !important;
+}
+
+@keyframes returnGlowLocal {
+  0%   { filter: drop-shadow(0 0 14px #16a34a) brightness(1.4); opacity: 1; }
+  60%  { filter: drop-shadow(0 0 6px rgba(22,163,74,0.4)); }
+  100% { filter: none; opacity: 0.45; }
+}
+
+/* Return value bubble — floats up from clone */
+.returnBubble {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font);
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.18);
+  border: 1px solid rgba(22, 163, 74, 0.6);
+  border-radius: 3px;
+  padding: 1px 5px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 30;
+  animation: floatUpLocal 0.5s ease-out forwards;
+}
+
+@keyframes floatUpLocal {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(0); }
+  25%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-28px); }
+}
+
 /* ── Main character ── */
 
 .mainChar {
@@ -178,6 +233,13 @@
   position: absolute;
   transform: translateX(-50%);
   z-index: 10;
+  overflow: visible;
+}
+
+/* Inner jump-animation wrapper for Level 2 clones */
+.cloneJumpAnim {
+  position: relative;
+  animation: cloneJump 0.4s ease-out both;
 }
 
 .flag {
@@ -191,4 +253,122 @@
 @keyframes flagWave {
   0%, 100% { transform: translateX(-50%) rotate(0deg); }
   50%       { transform: translateX(-50%) rotate(6deg); }
+}
+
+/* ═══════════════════════════════════════════════
+   LEVEL 1 — Building
+═══════════════════════════════════════════════ */
+
+.building {
+  position: absolute;
+  left: 55%; right: 3%;
+  bottom: 14%; top: 4%;
+  background: linear-gradient(180deg, #1e1b4b 0%, #2d2a6e 55%, #312e81 100%);
+  border: 1px solid #4338ca;
+  border-radius: 3px 3px 0 0;
+  z-index: 3;
+}
+
+.buildingFloor {
+  position: absolute;
+  left: 0; right: 0;
+}
+
+/* Floor boundary line — sits at the top edge of each floor div */
+.buildingFloorLine {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: rgba(99, 102, 241, 0.45);
+}
+
+/* Small window decoration */
+.buildingWindow {
+  position: absolute;
+  top: 20%; right: 14%;
+  width: 20%; height: 38%;
+  background: rgba(147, 197, 253, 0.08);
+  border: 1px solid rgba(147, 197, 253, 0.18);
+  border-radius: 2px;
+}
+
+/* Exit door */
+.buildingDoor {
+  position: absolute;
+  top: 3%; right: 12%;
+  font-size: 20px;
+  opacity: 0.45;
+  transition: opacity 0.4s, filter 0.4s;
+  z-index: 5;
+}
+
+.buildingDoorActive {
+  opacity: 1;
+  animation: doorPulse 1.0s ease-in-out infinite;
+}
+
+@keyframes doorPulse {
+  0%, 100% { filter: drop-shadow(0 0 10px #fbbf24) drop-shadow(0 0 20px rgba(251,191,36,0.45)); }
+  50%       { filter: drop-shadow(0 0 20px #fbbf24) drop-shadow(0 0 40px rgba(251,191,36,0.85)); }
+}
+
+/* Clone positioned in the building — left is fixed, bottom set via inline style */
+.buildingClone {
+  position: absolute;
+  left: 65%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+/* Main character for building scene — both left and bottom animated */
+.buildingMainChar {
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+/* ═══════════════════════════════════════════════
+   LEVEL 2 — Coin Stack
+═══════════════════════════════════════════════ */
+
+/* Coin pile container — sits above right platform surface */
+.coinPile {
+  position: absolute;
+  bottom: 8px;
+  right: 18px;
+  width: 40px;
+  height: 100px;
+}
+
+/* Individual coin disc — gold ellipse, stacked via inline bottom */
+.coinDisc {
+  position: absolute;
+  left: 0; right: 0;
+  height: 13px;
+  background: linear-gradient(90deg, #92400e, #f59e0b, #fde68a, #f59e0b, #92400e);
+  border-radius: 50%;
+  border: 1.5px solid #b45309;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.35), 0 0 8px rgba(245,158,11,0.35);
+}
+
+/* Total count on level complete */
+.coinTotal {
+  position: absolute;
+  top: -44px; right: 8px;
+  font-size: 20px; font-weight: 700;
+  color: #f59e0b;
+  font-family: var(--font);
+  letter-spacing: 1px;
+  text-shadow: 0 0 12px rgba(245,158,11,0.7);
+}
+
+/* Small coin badge on each clone */
+.cloneCoinBadge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  pointer-events: none;
+  z-index: 5;
 }

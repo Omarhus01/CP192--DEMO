@@ -1,4 +1,7 @@
+import { useMemo } from 'react'
 import styles from './LevelComplete.module.css'
+
+const CONFETTI_COLORS = ['#f97316', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#ec4899']
 
 export default function LevelComplete({ level, narratorLine, onNext, hasNextLevel }) {
   // Split explanation on **bold** markers for basic rich text
@@ -12,8 +15,37 @@ export default function LevelComplete({ level, narratorLine, onNext, hasNextLeve
     })
   }
 
+  // Confetti dots — stable random positions
+  const confetti = useMemo(() =>
+    Array.from({ length: 24 }, (_, i) => ({
+      left:   `${4 + (i * 3.8) % 92}%`,
+      delay:  `${(i * 0.083) % 0.9}s`,
+      color:  CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      size:   `${4 + (i % 4)}px`,
+      dur:    `${1.6 + (i % 3) * 0.25}s`,
+    }))
+  , [])
+
   return (
     <div className={styles.screen}>
+      {/* Confetti — 2 seconds of falling dots */}
+      <div className={styles.confettiContainer} aria-hidden="true">
+        {confetti.map((dot, i) => (
+          <div
+            key={i}
+            className={styles.confettiDot}
+            style={{
+              left:             dot.left,
+              width:            dot.size,
+              height:           dot.size,
+              background:       dot.color,
+              animationDelay:   dot.delay,
+              animationDuration: dot.dur,
+            }}
+          />
+        ))}
+      </div>
+
       <div className={styles.card}>
         <div className={styles.badge}>LEVEL COMPLETE</div>
         <h2 className={styles.title}>{level.title}</h2>

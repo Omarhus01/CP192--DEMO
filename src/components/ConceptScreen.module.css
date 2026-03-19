@@ -1,14 +1,16 @@
+/* ── Outer Screen ── */
+
 .screen {
   width: 100%; height: 100%;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 28px;
-  padding: 24px 32px 140px;
-  background: var(--bg);
+  align-items: center;
+  padding: 28px 32px 148px;
+  gap: 20px;
   position: relative;
+  overflow: hidden;
 }
 
-/* ── Progress ── */
+/* ── Progress dots ── */
 
 .progress {
   display: flex; gap: 8px; align-items: center;
@@ -16,162 +18,442 @@
 
 .dot {
   width: 8px; height: 8px; border-radius: 50%;
-  background: var(--border);
+  background: rgba(0, 0, 0, 0.15);
   transition: background 0.3s, transform 0.3s;
 }
 
-.dotActive {
-  background: var(--accent);
-  transform: scale(1.25);
+.dotCurrent {
+  background: #2563eb;
+  transform: scale(1.35);
 }
 
-/* ── Step label ── */
+.dotDone {
+  background: #16a34a;
+  transform: scale(1.1);
+}
 
-.stepLabel {
+/* ── Step header ── */
+
+.stepHeader {
   display: flex; align-items: center; gap: 12px;
 }
 
 .stepNum {
-  font-size: 10px; letter-spacing: 2px; color: var(--text-dim);
+  font-size: 10px; letter-spacing: 2px;
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .stepTitle {
   font-size: 11px; letter-spacing: 3px; font-weight: 700;
-  color: var(--accent); text-transform: uppercase;
+  color: #2563eb; text-transform: uppercase;
 }
 
 /* ── Step body ── */
 
 .stepBody {
-  width: 100%; max-width: 640px;
+  width: 100%; max-width: 660px;
   display: flex; align-items: center; justify-content: center;
+  flex: 1;
   min-height: 240px;
 }
 
-.stepContent {
+/* ═══════════════════════════════════════════════
+   STEP 1 — Nested Gift Boxes
+═══════════════════════════════════════════════ */
+
+.giftScene {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 20px;
+}
+
+.nestBox {
+  position: relative;
+  border: 3px solid; /* color injected inline */
+  border-radius: 6px;
+  display: flex; flex-direction: column;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
+
+.nestLid {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  flex-shrink: 0;
+}
+
+.nestInner {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px;
+}
+
+.baseLabel {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  color: #16a34a;
+  background: #dcfce7;
+  border: 1.5px solid #16a34a;
+  border-radius: 4px; padding: 5px 12px;
+  white-space: nowrap;
+}
+
+.giftCaption {
+  font-size: 12px; color: rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px; text-align: center;
+  font-style: italic; max-width: 320px; margin: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   STEPS 2 & 4 — Queue scenes
+═══════════════════════════════════════════════ */
+
+.queueScene {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 16px;
+  width: 100%;
+}
+
+.figureRow {
+  display: flex; align-items: flex-end;
+  justify-content: center;
+}
+
+.figureCol {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  width: 64px;
+}
+
+.figureTop {
+  height: 28px;
+  display: flex; align-items: flex-end; justify-content: center;
+  position: relative;
+}
+
+.figureLabel {
+  font-size: 9px; letter-spacing: 1.5px;
+  color: rgba(0, 0, 0, 0.4); text-align: center;
+  min-height: 14px;
+}
+
+.arrowGap {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: rgba(0, 0, 0, 0.2);
+  width: 28px; padding-bottom: 20px;
+  transition: color 0.3s;
+}
+
+.arrowGapLit {
+  color: #2563eb;
+  text-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
+}
+
+.arrowGapDim {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: rgba(0, 0, 0, 0.15);
+  width: 28px; padding-bottom: 20px;
+}
+
+.questionBadge {
+  font-size: 13px; font-weight: 700;
+  color: #2563eb; background: #dbeafe;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.checkBadge {
+  font-size: 12px; font-weight: 700;
+  color: #16a34a; background: #dcfce7;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.returnVal {
+  font-size: 13px; font-weight: 700;
+  color: #16a34a;
+  background: #dcfce7;
+  border: 1.5px solid #16a34a;
+  border-radius: 4px; padding: 1px 7px;
+  line-height: 1.4;
+}
+
+.clickPrompt {
+  font-size: 9px; letter-spacing: 1.5px;
+  color: #2563eb; text-transform: uppercase;
+  font-weight: 700;
+}
+
+.queueCaption {
+  font-size: 12px; color: rgba(0, 0, 0, 0.5);
+  text-align: center; min-height: 18px;
+  letter-spacing: 0.3px;
+}
+
+/* ═══════════════════════════════════════════════
+   STEP 3 — Label assignment
+═══════════════════════════════════════════════ */
+
+.labelScene {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 18px;
+  width: 100%;
+}
+
+.chipRow {
+  display: flex; gap: 12px;
+}
+
+.chip {
+  font-family: var(--font); font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; padding: 8px 18px;
+  border-radius: 4px; cursor: pointer;
+  transition: all 0.15s;
+  border: 2px solid transparent;
+}
+
+.chipBase {
+  background: #dcfce7; color: #15803d;
+  border-color: #86efac;
+}
+.chipBase:hover:not(.chipPlaced) { border-color: #16a34a; }
+
+.chipRecursive {
+  background: #dbeafe; color: #1d4ed8;
+  border-color: #93c5fd;
+}
+.chipRecursive:hover:not(.chipPlaced) { border-color: #2563eb; }
+
+.chipSelected {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.chipPlaced {
+  opacity: 0.5; cursor: default;
+}
+
+.labelHint {
+  font-size: 12px; color: rgba(0, 0, 0, 0.5);
+  font-style: italic;
+}
+
+.placedLabel {
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  padding: 2px 6px; border-radius: 3px;
+  white-space: nowrap;
+}
+
+.placedBase {
+  background: #dcfce7; color: #16a34a;
+  border: 1px solid #86efac;
+}
+
+.placedRecursive {
+  background: #dbeafe; color: #2563eb;
+  border: 1px solid #93c5fd;
+}
+
+/* ═══════════════════════════════════════════════
+   STEP 5 — Code block
+═══════════════════════════════════════════════ */
+
+.codeScene {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 16px;
+  width: 100%;
+}
+
+.codeBlock {
+  background: #0f1117;
+  border-radius: 8px;
+  padding: 22px 28px;
+  width: 100%; max-width: 560px;
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 2;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.18);
+}
+
+.codeLine {
+  white-space: pre;
+  display: block;
+}
+
+.codeType_def     { color: #93c5fd; }
+.codeType_base    { color: #6ee7b7; }
+.codeType_return  { color: #fca5a5; }
+.codeType_recurse { color: #fcd34d; }
+
+.codeComment {
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 1px 5px; border-radius: 3px;
+  border: 1px solid transparent;
+}
+
+.commentPulse {
+  animation: commentPulseAnim 1.5s ease-in-out infinite;
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #f97316;
+}
+
+@keyframes commentPulseAnim {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; box-shadow: 0 0 8px rgba(249, 115, 22, 0.35); }
+}
+
+.commentClicked {
+  color: #4ade80;
+  border-color: #16a34a;
+  cursor: default;
+}
+
+.codeHint {
+  font-size: 11px; color: rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.5px; text-align: center;
+  font-style: italic; margin: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   STEP 6 — Quiz
+═══════════════════════════════════════════════ */
+
+.quizScene {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 20px;
+  width: 100%; max-width: 520px;
+}
+
+.quizQuestion {
+  font-size: 16px; font-weight: 700;
+  color: rgba(0, 0, 0, 0.8);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.quizOptions {
+  display: flex; flex-direction: column;
+  gap: 10px; width: 100%;
+}
+
+.quizOption {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px; padding: 12px 18px;
+  cursor: pointer; text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  font-family: var(--font);
+}
+
+.quizOption:hover {
+  border-color: #2563eb;
+  background: rgba(219, 234, 254, 0.65);
+}
+
+.optionCorrect {
+  border-color: #16a34a !important;
+  background: rgba(220, 252, 231, 0.8) !important;
+}
+
+.optionWrong {
+  border-color: #dc2626 !important;
+  background: rgba(254, 226, 226, 0.8) !important;
+}
+
+.optionId {
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  color: rgba(0, 0, 0, 0.38); min-width: 16px;
+}
+
+.optionText {
+  font-size: 13px; color: rgba(0, 0, 0, 0.72);
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════════
+   STEP 7 — Ready
+═══════════════════════════════════════════════ */
+
+.readyScene {
   display: flex; flex-direction: column;
   align-items: center; gap: 20px;
   width: 100%;
 }
 
-/* ── Problem boxes ── */
-
-.problemChain {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 8px;
+.readyStage {
+  position: relative;
+  width: 100%; height: 120px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  overflow: visible;
 }
 
-.problemBox {
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg-secondary);
-  border: 1.5px solid var(--border);
-  border-left: 4px solid var(--blue);
-  border-radius: 4px;
-  font-family: var(--font);
-  color: var(--text);
-  font-weight: 700;
-  letter-spacing: 1px;
-  white-space: nowrap;
+.readyChar {
+  position: absolute;
+  bottom: 0;
 }
 
-.problemLit {
-  border-left-color: var(--accent);
-  background: var(--accent-bg);
-  color: var(--accent);
-}
-
-.bigProblem {
-  font-size: 28px; font-weight: 700; font-family: var(--font);
-  color: var(--text);
-  background: var(--bg-secondary);
-  border: 2px solid var(--border);
-  border-left: 5px solid var(--blue);
-  border-radius: 6px;
-  padding: 20px 36px;
-  letter-spacing: 2px;
-}
-
-.tooBig {
-  font-size: 11px; color: var(--text-dim); letter-spacing: 1px;
-}
-
-.hint {
-  font-size: 11px; color: var(--text-dim); letter-spacing: 1px;
+.readyNote {
+  font-size: 13px; color: rgba(0, 0, 0, 0.6);
+  text-align: center; line-height: 1.6;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px; padding: 12px 20px;
   font-style: italic;
 }
 
-.baseCase {
-  font-size: 11px; letter-spacing: 1px; font-weight: 700;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 1px solid var(--accent);
-  border-radius: 3px; padding: 6px 14px;
-}
-
-/* ── Code block (step 5) ── */
-
-.codeBlock {
-  background: #0f0e2e;
-  border-radius: 6px;
-  padding: 24px 28px;
-  width: 100%; max-width: 540px;
-  font-family: var(--font);
-  font-size: 13px;
-  line-height: 2;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 4px 32px rgba(0,0,0,0.25);
-}
-
-.codeLine { white-space: pre; }
-
-.code_def     { color: #93c5fd; }
-.code_base    { color: #6ee7b7; }
-.code_return  { color: #fca5a5; }
-.code_recurse { color: #fcd34d; }
-
-/* ── Final step ── */
-
-.finalStep {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 16px;
-  text-align: center;
-}
-
-.finalIcon { font-size: 48px; }
-
-.finalText {
-  font-size: 16px; color: var(--text);
-  line-height: 1.7; max-width: 360px; margin: 0;
-}
-
-/* ── Navigation ── */
+/* ═══════════════════════════════════════════════
+   Navigation buttons
+═══════════════════════════════════════════════ */
 
 .nextBtn {
   font-family: var(--font); font-size: 12px; font-weight: 700;
   letter-spacing: 3px; padding: 12px 32px;
   border-radius: 4px; cursor: pointer;
-  background: var(--bg-secondary);
-  color: var(--text);
-  border: 1.5px solid var(--border);
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(0, 0, 0, 0.7);
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
   transition: all 0.15s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .nextBtn:hover {
-  border-color: var(--text-dim);
+  border-color: rgba(0, 0, 0, 0.28);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.1);
 }
 
 .beginBtn {
-  background: var(--blue); color: #fff; border-color: var(--blue);
-  box-shadow: 0 2px 0 var(--blue-dim);
+  background: #2563eb; color: #fff;
+  border-color: #2563eb;
+  box-shadow: 0 2px 0 #1d4ed8;
 }
 
 .beginBtn:hover {
-  background: var(--blue-dim); border-color: var(--blue-dim);
-  box-shadow: 0 4px 20px rgba(37,99,235,0.4);
+  background: #1d4ed8; border-color: #1d4ed8;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
 }
 
-/* ── Corners ── */
+/* ═══════════════════════════════════════════════
+   Corner decorations
+═══════════════════════════════════════════════ */
 
-.cornerTL, .cornerBR { position: fixed; width: 44px; height: 44px; }
-.cornerTL { top: 20px; left: 20px; border-top: 2px solid var(--blue); border-left: 2px solid var(--blue); }
-.cornerBR { bottom: 130px; right: 20px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+.cornerTL, .cornerBR {
+  position: fixed;
+  width: 44px; height: 44px;
+}
+
+.cornerTL {
+  top: 20px; left: 20px;
+  border-top: 2px solid #2563eb;
+  border-left: 2px solid #2563eb;
+}
+
+.cornerBR {
+  bottom: 130px; right: 20px;
+  border-bottom: 2px solid var(--accent);
+  border-right: 2px solid var(--accent);
+}

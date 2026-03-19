@@ -1,49 +1,47 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  level2.js — "It Gets Worse"
+//  level2.js — "The Coin Stack"
 //  Teaches: recursive step + return value
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const level2 = {
   id: 2,
-  title: 'It Gets Worse',
-  subtitle: 'Climb the staircase. All of it.',
-  functionName: 'climb',
-  paramName: 'steps',
+  title: 'The Coin Stack',
+  subtitle: 'Count every coin.',
+  functionName: 'count',
+  paramName: 'coins',
   initialValue: 5,
 
   // ── Guided phase ──────────────────────────────────────────────────────────
   guidedSteps: [
-    { text: "Five steps. Your function climbs one step at a time. Each call handles one step and passes the result up.", highlight: 'scene' },
-    { text: "This time your function needs to return a value. The number of steps climbed. Each clone adds 1 to what the clone below it returned.", highlight: 'callstack' },
-    { text: "Base case: if there is only 1 step left, return 1. Recursive case: return 1 plus climb of steps minus 1. Think about why.", highlight: 'editor' },
+    { text: "Five coins. Your function picks up one coin at a time. Each clone picks one up and asks the clone below it to count the rest.", highlight: 'scene' },
+    { text: "This time your function must return a value — the number of coins counted. Each clone adds 1 to what the clone below returned. Watch what travels back up.", highlight: 'callstack' },
+    { text: "Base case: if there are zero coins, return 0. Recursive case: return 1 plus count of coins minus 1. Think about why those two pieces produce the total.", highlight: 'editor' },
   ],
 
-  scaffoldIntroLine: "You've seen how it works. Fill in the blanks. Four values. Think carefully about what each one should be.",
-  scaffoldTemplate: "if steps <= ___:\n    return ___\nreturn ___ + climb(___)",
-  scaffoldWrongLine: "Check your return values. Each call should return a number, not just True.",
-  freePhaseIntro: "You've seen it. Now do it without the training wheels.",
+  scaffoldIntroLine: "You've seen how it works. Fill in the four blanks. Think carefully about what each one should be.",
+  scaffoldTemplate: "if coins == ___:\n    return ___\nreturn ___ + count(___)",
+  scaffoldWrongLine: "Not quite. Check your return values. count(0) should return 0, and the recursive case should return 1 + count of a smaller input.",
+  freePhaseIntro: "You've seen it. Now write it yourself without the scaffolding.",
 
-  starterCode: `    # climb(5) should return 5
-    # Each recursive call should return a value
-    # climb(1) is your base case
+  starterCode: `    # count(5) should return 5
+    # count(0) is your base case — return 0
+    # Each recursive call should return 1 + count(coins - 1)
     pass
 `,
 
-  successExplanation: `This time, each clone didn't just stop — it handed a result back up the chain.
+  successExplanation: `This time, each clone didn't just stop — it handed a number back up the chain.
 
-climb(5) called climb(4), which called climb(3), which called climb(2), which called climb(1) — the base case.
+count(5) called count(4), which called count(3)... down to count(0) — the base case, which returned 0.
 
-Then the returns bubbled up: climb(1) returned 1, climb(2) returned 2, climb(3) returned 3... all the way back.
+Then the returns bubbled up: count(0) returned 0, count(1) returned 1, count(2) returned 2... all the way to count(5) returning 5.
 
-This is how recursive functions return values. Each call waits for the one below it, then uses the result.`,
+Each call waited for the one below it, then added 1 to the result. That is how recursive functions return values.`,
 
-  hint: `    if steps == ___:   # base case: when to stop?
-        return ___
-    return ___ + climb(steps - ___)  # build up the answer`,
+  hint: `    if coins == ___:   # base case: no coins left
+        return ___          # nothing to count
+    return ___ + count(coins - ___)  # one coin plus the rest`,
 
   scene: {
-    stairCount: 5,
-    characterLabel: 'YOU',
-    goalLabel: '🏁',
+    coinCount: 5,
   },
 }

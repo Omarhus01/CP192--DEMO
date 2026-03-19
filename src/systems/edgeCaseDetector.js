@@ -46,10 +46,11 @@ export function getIdleTrigger(idleSeconds) {
  */
 export function outcomeToNarratorTrigger(outcome, isFirstAttempt) {
   switch (outcome) {
-    case 'success':    return isFirstAttempt ? 'correctFirstTry' : 'correct'
-    case 'overflow':   return 'noBaseCase'
-    case 'earlyExit':  return 'earlyExit'
-    case 'wrongDepth': return 'wrongDepth'
-    default:           return 'correct'
+    case 'success':     return isFirstAttempt ? 'correctFirstTry' : 'correct'
+    case 'overflow':    return 'noBaseCase'
+    case 'earlyExit':   return 'earlyExit'
+    case 'wrongDepth':  return 'wrongDepth'
+    case 'wrongResult': return 'wrongResult'
+    default:            return 'correct'
   }
 }

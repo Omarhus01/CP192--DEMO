@@ -55,14 +55,14 @@ const superliminalHighlight = HighlightStyle.define([
 
 const editableCompartment = new Compartment()
 
-export default function CodeEditor({ level, onChange, disabled, errorLine }) {
+export default function CodeEditor({ level, onChange, disabled, errorLine, resetKey }) {
   const containerRef = useRef(null)
   const viewRef      = useRef(null)
 
   useEffect(() => {
     if (!containerRef.current) return
 
-    // Destroy previous instance if re-mounting for a new level
+    // Destroy previous instance if re-mounting for a new level or after reset
     viewRef.current?.destroy()
 
     const view = new EditorView({
@@ -86,7 +86,7 @@ export default function CodeEditor({ level, onChange, disabled, errorLine }) {
     onChange(level.starterCode ?? '')
 
     return () => view.destroy()
-  }, [level.id]) // eslint-disable-line
+  }, [level.id, resetKey]) // eslint-disable-line
 
   // Disable/enable based on prop change
   useEffect(() => {

@@ -8,7 +8,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 40px 24px 130px;
+  padding: 40px 24px 40px;
   z-index: 10;
   overflow: hidden;
 }
@@ -30,7 +30,7 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   animation: fadeUp 0.8s ease both;
 }
 
@@ -51,16 +51,67 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
+  transition: border-color 0.6s ease, box-shadow 0.6s ease;
 }
 
+/* Warm expression */
+.portraitFaceWarm {
+  border-color: #22c55e;
+  box-shadow: 0 0 30px rgba(34,197,94,0.25), 0 0 60px rgba(34,197,94,0.08);
+}
+
+/* Unhinged expression */
+.portraitFaceUnhinged {
+  border-color: var(--red);
+  box-shadow: 0 0 30px rgba(255,34,68,0.55), 0 0 70px rgba(255,34,68,0.2);
+  animation: creditsUnhingedShake 0.12s steps(2) infinite;
+}
+
+@keyframes creditsUnhingedShake {
+  0%   { transform: translate(0, 0)      rotate(0deg);  }
+  50%  { transform: translate(-2px, 1px) rotate(-3deg); }
+  100% { transform: translate(1px, -1px) rotate(2deg);  }
+}
+
+/* Eyes */
+
 .eyes { display: flex; gap: 22px; }
-.eye  { width: 12px; height: 12px; border-radius: 50%; background: var(--text-inv); }
+.eye  {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-inv);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+
+.eyeWarm     { background: #86efac; box-shadow: 0 0 6px rgba(134,239,172,0.5); }
+.eyeUnhinged { background: var(--red); box-shadow: 0 0 8px rgba(255,34,68,0.7); }
+
+/* Mouth */
 
 .mouth {
   width: 36px;
   height: 5px;
   background: #4a5a7a;
   border-radius: 2px;
+  transition: all 0.4s ease;
+}
+
+.mouthWarm {
+  width: 38px;
+  height: 18px;
+  background: transparent;
+  border: 3px solid #22c55e;
+  border-top: none;
+  border-radius: 0 0 22px 22px;
+}
+
+.mouthUnhinged {
+  width: 38px;
+  height: 5px;
+  background: var(--red);
+  border-radius: 1px;
+  transform: rotate(-7deg);
 }
 
 .portraitName {
@@ -75,6 +126,31 @@
   letter-spacing: 1px;
   color: #3a4a6a;
   text-transform: uppercase;
+}
+
+/* ── Dialogue area (replaces bottom NarratorBox) ── */
+
+.dialogueArea {
+  max-width: 560px;
+  width: 100%;
+  min-height: 3em;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-inv);
+  line-height: 1.7;
+  margin-bottom: 36px;
+  padding: 0 16px;
+}
+
+.cursor {
+  display: inline-block;
+  animation: blink 0.8s step-start infinite;
+  color: var(--accent);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
 /* ── Buttons ── */

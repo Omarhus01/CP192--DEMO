@@ -5,9 +5,10 @@ import styles from './NarratorBox.module.css'
 
 function Portrait({ expression, bobbing }) {
   const eyeClass =
-    expression === 'stressed'     ? styles.eyeStressed :
-    expression === 'warm'         ? styles.eyeWarm     :
-    expression === 'engaged'      ? styles.eyeEngaged  : ''
+    expression === 'stressed'     ? styles.eyeStressed  :
+    expression === 'warm'         ? styles.eyeWarm      :
+    expression === 'engaged'      ? styles.eyeEngaged   :
+    expression === 'unhinged'     ? styles.eyeUnhinged  : ''
 
   const squintEye =
     expression === 'professional' || expression === 'stern'

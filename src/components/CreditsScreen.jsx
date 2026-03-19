@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { speak, FINALE_LINES } from '../systems/narratorSystem.js'
+import NarratorBox from './NarratorBox.jsx'
 import styles from './CreditsScreen.module.css'
 
-// ── Typewriter text ────────────────────────────────────────────────────────────
+// ── Typewriter for Play Again mode ────────────────────────────────────────────
 
 function TypewriterText({ text }) {
   const [displayed, setDisplayed] = useState('')
@@ -31,36 +32,17 @@ function TypewriterText({ text }) {
   )
 }
 
-// ── Big portrait ───────────────────────────────────────────────────────────────
+// ── Reactive big portrait (Play Again mode only) ───────────────────────────────
 
-function BigPortrait({ expression }) {
-  const isWarm     = expression === 'warm'
-  const isUnhinged = expression === 'unhinged'
-
+function UnhingedPortrait() {
   return (
     <div className={styles.portrait}>
-      <div className={[
-        styles.portraitFace,
-        isWarm     ? styles.portraitFaceWarm     : '',
-        isUnhinged ? styles.portraitFaceUnhinged : '',
-      ].join(' ')}>
+      <div className={`${styles.portraitFace} ${styles.portraitFaceUnhinged}`}>
         <div className={styles.eyes}>
-          <div className={[
-            styles.eye,
-            isWarm     ? styles.eyeWarm     : '',
-            isUnhinged ? styles.eyeUnhinged : '',
-          ].join(' ')} />
-          <div className={[
-            styles.eye,
-            isWarm     ? styles.eyeWarm     : '',
-            isUnhinged ? styles.eyeUnhinged : '',
-          ].join(' ')} />
+          <div className={`${styles.eye} ${styles.eyeUnhinged}`} />
+          <div className={`${styles.eye} ${styles.eyeUnhinged}`} />
         </div>
-        <div className={[
-          styles.mouth,
-          isWarm     ? styles.mouthWarm     : '',
-          isUnhinged ? styles.mouthUnhinged : '',
-        ].join(' ')} />
+        <div className={`${styles.mouth} ${styles.mouthUnhinged}`} />
       </div>
       <div className={styles.portraitName}>Dr. Callum Stack</div>
       <div className={styles.portraitTitle}>Head of Theoretical Clone Operations</div>
@@ -71,11 +53,12 @@ function BigPortrait({ expression }) {
 // ── CreditsScreen ──────────────────────────────────────────────────────────────
 
 export default function CreditsScreen({ isMuted }) {
-  const [creditsLine,        setCreditsLine]        = useState(null)
-  const [portraitExpression, setPortraitExpression] = useState('neutral')
-  const [showPlayAgain,      setShowPlayAgain]      = useState(false)
-  const [showExit,           setShowExit]           = useState(false)
-  const [exited,             setExited]             = useState(false)
+  const [narratorLine,  setNarratorLine]  = useState(null)
+  const [showButtons,   setShowButtons]   = useState(false)
+  const [playAgainMode, setPlayAgainMode] = useState(false)
+  const [playAgainLine, setPlayAgainLine] = useState(null)
+  const [showExit,      setShowExit]      = useState(false)
+  const [exited,        setExited]        = useState(false)
   const isMutedRef = useRef(isMuted)
   const ranRef     = useRef(false)
 
@@ -88,75 +71,84 @@ export default function CreditsScreen({ isMuted }) {
   }, []) // eslint-disable-line
 
   async function runSequence() {
-    for (let i = 0; i < FINALE_LINES.length; i++) {
-      const item = FINALE_LINES[i]
+    for (const item of FINALE_LINES) {
       const text = typeof item === 'string' ? item : item.text
       const vs   = typeof item === 'string' ? null  : item.voiceSettings
-      // Warm expression on the last line
-      if (i === FINALE_LINES.length - 1) setPortraitExpression('warm')
-      setCreditsLine(text)
+      setNarratorLine(text)
       await speak(text, isMutedRef.current, 0, vs)
-      await new Promise(r => setTimeout(r, 1000))
+      await new Promise(r => setTimeout(r, 1500))
     }
-    setShowPlayAgain(true)
-    setShowExit(true)
+    setShowButtons(true)
   }
 
   async function handlePlayAgain() {
-    setShowPlayAgain(false)
-    setShowExit(false)
-    setPortraitExpression('unhinged')
+    setShowButtons(false)
+    setPlayAgainMode(true)
     const line1 = "Again? AGAIN? Did you not just hear what I said? This is a DEMO. Close the tab. Come back when we are done."
-    setCreditsLine(line1)
+    setPlayAgainLine(line1)
     await speak(line1, isMutedRef.current, 0)
     await new Promise(r => setTimeout(r, 2000))
     const line2 = "...I'm serious. Close it."
-    setCreditsLine(line2)
+    setPlayAgainLine(line2)
     await speak(line2, isMutedRef.current, 0)
     await new Promise(r => setTimeout(r, 500))
     setShowExit(true)
   }
 
+  // ── Exit screen: plain, nothing ───────────────────────────────────────────
   if (exited) {
     return (
       <div className={styles.exitScreen}>
-        <div className={styles.exitFace}>
-          <div className={styles.exitEyes}>
-            <div className={styles.exitEye} />
-            <div className={styles.exitEye} />
-          </div>
-          <div className={styles.exitMouth} />
-        </div>
-        <div className={styles.exitLabel}>DR. CALLUM STACK</div>
-        <p className={styles.exitText}>Close the tab.</p>
+        <p className={styles.exitText}>END OF DEMO</p>
       </div>
     )
   }
 
+  // ── Play Again mode: big unhinged portrait takes over ─────────────────────
+  if (playAgainMode) {
+    return (
+      <div className={styles.screen}>
+        <UnhingedPortrait />
+        <div className={styles.playAgainDialogue}>
+          {playAgainLine && <TypewriterText key={playAgainLine} text={playAgainLine} />}
+        </div>
+        {showExit && (
+          <button className={styles.btnSecondary} onClick={() => setExited(true)}>EXIT</button>
+        )}
+      </div>
+    )
+  }
+
+  // ── Normal sequence mode: static portrait + NarratorBox at bottom ─────────
   return (
     <div className={styles.screen}>
       <span className={styles.tag}>END OF DEMO // FACILITY ID: CP-192</span>
 
-      <BigPortrait expression={portraitExpression} />
-
-      <div className={styles.dialogueArea}>
-        {creditsLine && <TypewriterText key={creditsLine} text={creditsLine} />}
+      <div className={styles.portrait}>
+        <div className={styles.portraitFace}>
+          <div className={styles.eyes}>
+            <div className={styles.eye} />
+            <div className={styles.eye} />
+          </div>
+          <div className={styles.mouth} />
+        </div>
+        <div className={styles.portraitName}>Dr. Callum Stack</div>
+        <div className={styles.portraitTitle}>Head of Theoretical Clone Operations</div>
       </div>
 
-      {(showPlayAgain || showExit) && (
+      {showButtons && (
         <div className={styles.buttons}>
-          {showPlayAgain && (
-            <button className={styles.btnPrimary} onClick={handlePlayAgain}>
-              PLAY AGAIN
-            </button>
-          )}
-          {showExit && (
-            <button className={styles.btnSecondary} onClick={() => setExited(true)}>
-              EXIT
-            </button>
-          )}
+          <button className={styles.btnPrimary}   onClick={handlePlayAgain}>PLAY AGAIN</button>
+          <button className={styles.btnSecondary} onClick={() => setExited(true)}>EXIT</button>
         </div>
       )}
+
+      <NarratorBox
+        line={narratorLine}
+        expression="neutral"
+        isMuted={isMuted}
+        onToggleMute={() => {}}
+      />
     </div>
   )
 }

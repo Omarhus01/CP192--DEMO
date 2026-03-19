@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import TitleScreen    from './components/TitleScreen.jsx'
 import LevelScreen    from './components/LevelScreen.jsx'
-import LevelComplete  from './components/LevelComplete.jsx'
 import StackOverflow  from './components/StackOverflow.jsx'
 import NarratorBox    from './components/NarratorBox.jsx'
 import OnboardingQuiz from './components/OnboardingQuiz.jsx'
@@ -31,9 +30,9 @@ export default function App() {
   const [narratorState,  setNarratorState]   = useState(INITIAL_NARRATOR)
   const [lineTracker,    setLineTracker]      = useState({})
   const [narratorLine,   setNarratorLine]    = useState(null)
-  const [completionData,    setCompletionData]    = useState(null)
-  const [transitioning,     setTransitioning]     = useState(false)
-  const [conceptExpression, setConceptExpression] = useState(null)
+const [transitioning,        setTransitioning]        = useState(false)
+  const [conceptExpression,    setConceptExpression]    = useState(null)
+  const [overflowReturnPhase,  setOverflowReturnPhase]  = useState('guided')
 
   const currentLevel      = LEVELS[levelIndex]
   const startingRef       = useRef(false)
@@ -62,12 +61,11 @@ export default function App() {
   // ── Screen → music ────────────────────────────────────────────────────────────
   useEffect(() => {
     const MAP = {
-      quiz:          'title',
-      concept:       'title',
-      title:         'title',
-      level:         'level',
-      levelComplete: 'levelComplete',
-      overflow:      'overflow',
+      quiz:     'title',
+      concept:  'title',
+      title:    'title',
+      level:    'level',
+      overflow: 'overflow',
     }
     const key = MAP[screen]
     if (key) playTrack(key)
@@ -145,36 +143,33 @@ export default function App() {
     setNarratorState(prev => ({ ...prev, attemptCount: prev.attemptCount + 1 }))
   }
 
-  function handleOverflow() {
+  function handleOverflow(phase) {
     setNarratorState(prev => ({ ...prev, attemptCount: prev.attemptCount + 1 }))
+    setOverflowReturnPhase(phase ?? 'guided')
     navigateTo('overflow')
   }
 
   function handleLevelComplete(data) {
     const wasFirst = narratorState.attemptCount === 0
-    setCompletionData(data)
     if (currentLevel.id === 1 && wasFirst) {
       setNarratorState(prev => ({ ...prev, level1Perfect: true }))
     }
-    if (data.unrecognized) {
+    if (data?.unrecognized) {
       setNarratorState(prev => ({
         ...prev,
         unrecognizedSolutionsFound: [...prev.unrecognizedSolutionsFound, data.outcome],
       }))
     }
-    navigateTo('levelComplete')
-  }
-
-  function handleNextLevel() {
     const next = levelIndex + 1
     if (next < LEVELS.length) {
-      if (narratorState.level1Perfect && currentLevel.id === 1) {
+      if (wasFirst && currentLevel.id === 1) {
         const { text, nextTracker } = getLine('level2AfterPerfectRun', narratorState, lineTracker)
         setNarratorLine(text)
         setLineTracker(nextTracker)
         speak(text, isMuted)
       }
       setNarratorState(prev => ({ ...prev, attemptCount: 0 }))
+      setOverflowReturnPhase('guided')
       setLevelIndex(next)
       navigateTo('level')
     } else {
@@ -221,6 +216,8 @@ export default function App() {
         <LevelScreen
           key={levelKey}
           level={currentLevel}
+          initialPhase={overflowReturnPhase}
+          hasNextLevel={levelIndex + 1 < LEVELS.length}
           narratorState={narratorState}
           lineTracker={lineTracker}
           isMuted={isMuted}
@@ -231,31 +228,12 @@ export default function App() {
         />
       )}
 
-      {screen === 'levelComplete' && completionData && (
-        <LevelComplete
-          level={currentLevel}
-          narratorLine={completionData.narratorLine}
-          onNext={handleNextLevel}
-          hasNextLevel={levelIndex + 1 < LEVELS.length}
-        />
-      )}
-
       {screen === 'overflow' && (
         <StackOverflow onRestart={handleRestartFromOverflow} isMuted={isMuted} />
       )}
 
       {screen === 'credits' && (
-        <CreditsScreen
-          isMuted={isMuted}
-          onPlayAgain={() => {
-            startingRef.current = false   // allow handleStart to fire again
-            setLevelIndex(0)
-            setNarratorState(INITIAL_NARRATOR)
-            setLineTracker({})
-            setNarratorLine(null)
-            navigateTo('title')
-          }}
-        />
+        <CreditsScreen isMuted={isMuted} />
       )}
 
       {/* ── Crossfade overlay for screen transitions ── */}

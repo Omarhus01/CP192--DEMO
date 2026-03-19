@@ -21,7 +21,7 @@ const SPEED_CONFIG = {
 
 // ── Reducer ───────────────────────────────────────────────────────────────────
 
-function makeInitial(level) {
+function makeInitial(level, initialPhase = 'guided') {
   return {
     userCode:       level.starterCode ?? '',
     phase:          'idle',
@@ -35,7 +35,7 @@ function makeInitial(level) {
     callStackInteracted: false,
     characterAtEnd: false,
     errorLine:      null,
-    levelPhase:     'guided',
+    levelPhase:     initialPhase,
     guidedStep:     0,
   }
 }
@@ -56,7 +56,7 @@ function reducer(state, action) {
     case 'RESET':           return { ...makeInitial(action.level), resetCount: state.resetCount + 1, levelPhase: state.levelPhase, guidedStep: state.levelPhase === 'guided' ? state.guidedStep : 0 }
     case 'NEXT_GUIDED_STEP': return { ...state, guidedStep: state.guidedStep + 1 }
     case 'SET_LEVEL_PHASE':  return { ...state, levelPhase: action.payload }
-    case 'SCAFFOLD_SUCCESS': return { ...makeInitial(action.level), resetCount: state.resetCount, levelPhase: 'free' }
+    case 'SCAFFOLD_SUCCESS': return { ...makeInitial(action.level), resetCount: state.resetCount + 1, levelPhase: 'free' }
     case 'STACK_INTERACT':  return { ...state, callStackInteracted: true }
     case 'SET_ERROR':      return { ...state, errorLine: action.payload, phase: 'idle' }
     default:               return state
@@ -66,11 +66,14 @@ function reducer(state, action) {
 // ── LevelScreen ───────────────────────────────────────────────────────────────
 
 export default function LevelScreen({
-  level, narratorState, lineTracker, isMuted,
+  level, initialPhase = 'guided', hasNextLevel = false, narratorState, lineTracker, isMuted,
   onNarratorLine, onOverflow, onLevelComplete, onWrongAttempt,
 }) {
-  const [state, dispatch] = useReducer(reducer, level, makeInitial)
+  const [state, dispatch] = useReducer(reducer, initialPhase, (phase) => makeInitial(level, phase))
   const [speed, setSpeed] = useState('slow')
+  const [successOverlay, setSuccessOverlay] = useState(false)
+  const [showNextBtn,    setShowNextBtn]    = useState(false)
+  const pendingCompletionRef = useRef(null)
 
   const animTimerRef      = useRef(null)
   const simResultRef      = useRef(null)
@@ -188,6 +191,10 @@ export default function LevelScreen({
 
       case 'baseCase': {
         dispatch({ type: 'MARK_BASE' })
+        // Trigger success overlay labels as soon as base case fires
+        if (simResultRef.current?.outcome === 'success' && stateRef.current.levelPhase === 'free') {
+          setSuccessOverlay(true)
+        }
         // Dramatic pause — deepest clone glows, stack entry turns green
         // Then narrator fires, then results start bubbling
         const cfg = SPEED_CONFIG[speedRef.current]
@@ -218,7 +225,7 @@ export default function LevelScreen({
         } else {
           fireNarrator('noBaseCase')
         }
-        setTimeout(() => onOverflow(), 1600)
+        setTimeout(() => onOverflow(stateRef.current.levelPhase), 1600)
         break
 
       case 'complete': {
@@ -361,7 +368,7 @@ export default function LevelScreen({
     const isFirst = ns.attemptCount === 0
     const s       = stateRef.current
 
-    // ── Scaffold phase success: transition to free ─────────────────────────
+    // ── Scaffold phase success: transition to free ─────────────────────────────
     if (s.levelPhase === 'scaffold') {
       const text = level.freePhaseIntro ?? "Good. Now write it yourself."
       fireScaffoldLine(text)
@@ -373,7 +380,6 @@ export default function LevelScreen({
 
     let text, nextTracker
     if (unrecog) {
-      // Unrecognized but correct — special win line, still advance
       const times = ns.unrecognizedSolutionsFound?.length ?? 0
       ;({ text, nextTracker } = getLine(
         times > 0 ? 'unrecognizedSolutionAgain' : 'unrecognizedSolution', ns, lt
@@ -396,9 +402,28 @@ export default function LevelScreen({
     const ignored = didIgnoreCallStack(level.id, s.callStackInteracted)
     if (ignored) setTimeout(() => fireNarrator('ignoredCallStack'), 200)
 
+    // Save completion data — delivered when player clicks the in-scene Next button
+    pendingCompletionRef.current = {
+      outcome:     'success',
+      narratorLine: text,
+      ignoredStack: ignored,
+      unrecognized: unrecog,
+    }
+
+    // Fire explanation voiceover, then reveal Next Level button
     setTimeout(() => {
-      onLevelComplete({ outcome: 'success', narratorLine: text, ignoredStack: ignored, unrecognized: unrecog })
-    }, 1600)
+      const explanationLine = level.id === 1
+        ? "There it is. The base case fired. True is traveling back up through every clone that was waiting. That is the return chain."
+        : "Each clone added 1 to what the clone below returned. Zero became one, one became two, all the way to five. That is how recursive functions return values."
+      onNarratorLineRef.current(explanationLine, lineTrackerRef.current)
+      playNarratorClick(isMutedRef.current)
+      speak(explanationLine, isMutedRef.current, narratorStateRef.current.attemptCount)
+      setTimeout(() => setShowNextBtn(true), 5000)
+    }, 800)
+  }
+
+  function handleNextLevelClick() {
+    onLevelComplete(pendingCompletionRef.current)
   }
 
   function handleWrongResult(outcome) {
@@ -424,6 +449,22 @@ export default function LevelScreen({
   // ── Render ──────────────────────────────────────────────────────────────────
 
   const expression       = getExpression(narratorState)
+  const successLabel = (() => {
+    if (!successOverlay) return null
+    if (state.characterAtEnd) {
+      if (level.id === 1) return { type: 'text', text: 'chain resolved — all floors climbed' }
+      if (level.id === 2) return { type: 'number', value: level.initialValue }
+    }
+    const ret = state.clones.find(c => c.isReturning)
+    if (!ret) return null
+    if (ret.isBase) {
+      if (level.id === 1) return { type: 'text', text: 'base case — climb(1) returned True' }
+      if (level.id === 2) return { type: 'text', text: 'base case — count(0) returned 0' }
+    }
+    if (level.id === 1) return { type: 'text', text: 'passing True up...' }
+    if (level.id === 2) return { type: 'text', text: `count(${ret.depth}) = ${ret.returnValue}` }
+    return null
+  })()
   const hasGuided        = (level.guidedSteps?.length ?? 0) > 0
   const currentHighlight = state.levelPhase === 'guided'
     ? (level.guidedSteps?.[state.guidedStep]?.highlight ?? null)
@@ -470,6 +511,22 @@ export default function LevelScreen({
             clones={state.clones}
             characterAtEnd={state.characterAtEnd}
           />
+
+          {/* Success overlay — contextual labels + next level button */}
+          {successOverlay && (
+            <div className={styles.successOverlay}>
+              {successLabel && (
+                successLabel.type === 'number'
+                  ? <div className={styles.successNumber}>✓ {successLabel.value}</div>
+                  : <div className={styles.successLabelText}>{successLabel.text}</div>
+              )}
+              {showNextBtn && (
+                <button className={styles.nextSceneBtn} onClick={handleNextLevelClick}>
+                  {hasNextLevel ? 'NEXT LEVEL →' : 'FINISH →'}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Call stack column */}

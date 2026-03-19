@@ -292,11 +292,11 @@ export async function speak(text, isMuted, attemptCount = 0, emotionOverride = n
   const settings = emotionOverride ?? getVoiceSettings(attemptCount);
   try {
     const response = await fetch(
-      "https://api.elevenlabs.io/v1/text-to-speech/KBLHminGtDQakseTFmf0",
+      "https://api.elevenlabs.io/v1/text-to-speech/OtGahjKmUaUO2G6wqCm9",
       {
         method: "POST",
         headers: {
-          "xi-api-key": "sk_9cf2c77dd1d379ea364cfefc8dd423241a61dfb2179e2fb2",
+          "xi-api-key": "sk_1b7c6b35a37f26ce7dd11cca4648455a4d61a4dd18070f7a",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({

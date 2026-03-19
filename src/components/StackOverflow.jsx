@@ -38,7 +38,7 @@ function ScatteredClones() {
   )
 }
 
-export default function StackOverflow({ onRestart, isMuted }) {
+export default function StackOverflow({ onRestart, isMuted, attemptCount = 0 }) {
   const hasRun = useRef(false)
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function StackOverflow({ onRestart, isMuted }) {
     hasRun.current = true
     document.body.classList.add('shake')
     const t1 = setTimeout(() => document.body.classList.remove('shake'), 500)
-    speakOverflow(isMuted)
+    speakOverflow(isMuted, attemptCount)
     return () => clearTimeout(t1)
   }, []) // eslint-disable-line
 

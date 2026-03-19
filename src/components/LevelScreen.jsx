@@ -397,7 +397,8 @@ export default function LevelScreen({
 
     onNarratorLineRef.current(text, nextTracker)
     playNarratorClick(isMutedRef.current)
-    speak(text, isMutedRef.current, ns.attemptCount)
+    const successEmotion = isFirst ? { stability: 0.8, similarity_boost: 0.75, style: 0.1 } : null
+    speak(text, isMutedRef.current, ns.attemptCount, successEmotion)
 
     const ignored = didIgnoreCallStack(level.id, s.callStackInteracted)
     if (ignored) setTimeout(() => fireNarrator('ignoredCallStack'), 200)
@@ -413,8 +414,8 @@ export default function LevelScreen({
     // Fire explanation voiceover, then reveal Next Level button
     setTimeout(() => {
       const explanationLine = level.id === 1
-        ? "There it is. The base case fired. True is traveling back up through every clone that was waiting. That is the return chain."
-        : "Each clone added 1 to what the clone below returned. Zero became one, one became two, all the way to five. That is how recursive functions return values."
+        ? "There it is. The base case fired — climb(1) returned True. Now watch: every clone that was waiting gets to return, one by one, all the way back to climb(5). That's the return chain."
+        : "Each clone added 1 to what the clone below it returned. count(0) said zero. count(1) said one. All the way up to count(5), which said five. That is how recursive return values work."
       onNarratorLineRef.current(explanationLine, lineTrackerRef.current)
       playNarratorClick(isMutedRef.current)
       speak(explanationLine, isMutedRef.current, narratorStateRef.current.attemptCount)

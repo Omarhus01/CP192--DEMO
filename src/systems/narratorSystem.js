@@ -7,7 +7,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const NARRATOR = {
-  name: 'Dr. Callum Stack',
+  name: 'Omarito',
   title: 'Head of Theoretical Clone Operations',
 }
 
@@ -15,196 +15,196 @@ export const NARRATOR = {
 export const LINES = {
 
   quizYes: [
-    "Oh thank god. I was not prepared to explain variables today.",
+    "Good. Then we can skip the part where I explain what a variable is. I was not prepared for that today.",
   ],
 
   quizNo1: [
-    "Then what are you doing here. Leave.",
+    "Then what are you doing here. This is not the place for you. The door is behind you. It opens outward.",
   ],
 
   quizNo2: [
-    "...Fine. I'll explain everything. Don't make me regret this.",
+    "...Fine. We proceed. Don't take that as encouragement.",
   ],
 
   conceptStep1: [
-    "Here is a problem. It's too big to solve directly.",
+    "Here is the problem. It is too large to solve directly. So don't.",
   ],
 
   conceptStep2: [
-    "So we solve a smaller version of it.",
+    "Solve a slightly smaller version of it instead. Then a slightly smaller version of that.",
   ],
 
   conceptStep3: [
-    "Until the problem is so small, the answer is obvious. That's the base case.",
+    "Keep going until the problem is so small the answer is obvious. That stopping point — that's the base case. It is the most important line you will write today.",
   ],
 
   conceptStep4: [
-    "Then the answers bubble back up. Each step adds its piece.",
+    "Now the answers travel back. Each step receives what the step below it found, adds its piece, and passes it up. By the time it reaches you, the full answer is there.",
   ],
 
   conceptStep5: [
-    "This is what a recursive function looks like in Python.",
+    "This is what that looks like in Python. Read it slowly.",
   ],
 
   conceptStep6: [
-    "That's recursion. Now do it yourself.",
+    "That's recursion. Base case, recursive call, return chain. You're going to use all three in approximately two minutes.",
   ],
 
   intro: [
-    "Welcome. I am Dr. Callum Stack. This is a standard orientation exercise. Nothing unusual is happening.",
-    "You will be asked to solve a simple problem. Very simple. Completely routine. Please do not make it weird.",
+    "Welcome. I am Dr. Omarito. This is a standard orientation exercise. Nothing unusual is happening.",
+    "You will be asked to write one simple function. It will either work or it will not. I have documentation for both outcomes.",
   ],
 
   level1Intro: [
-    "The elevator is broken. Five floors. Your function handles one floor at a time and asks a clone to handle the rest. Write the base case and the recursive call.",
-    "Objective: reach the top floor. climb(5) calls climb(4), which calls climb(3)... until the base case. Then they all return. Try not to destroy the call stack.",
+    "The elevator is broken. Five floors. Your function handles one floor and hands the rest to a clone. Write the base case — when do you stop — and the recursive call — what do you pass down.",
+    "climb(5) calls climb(4), which calls climb(3), which calls climb(2), which calls climb(1). Then they all return. Watch the call stack. That panel on the right is not decoration.",
   ],
 
   level2Intro: [
-    "Five coins. You can only pick up one at a time. Your function picks one up and asks a clone to count the rest. Then it adds 1 to what the clone returns.",
-    "Level Two. count(coins) should return the total number of coins. Each call returns 1 plus count of coins minus one. The base case returns zero. Pay attention to what travels back up.",
+    "Five coins. Your function picks one up, then asks a clone to count the rest. Then it returns 1 plus whatever the clone returned. The return value is the point. It is the entire point.",
+    "count(5) calls count(4), all the way down to count(0). That's your base case. Then the answers travel back up, each one adding 1. By the time it reaches count(5), the answer is 5. That is how this works.",
   ],
 
   level2AfterPerfectRun: [
-    "Perfect run on Level One. I've adjusted Level Two accordingly.",
+    "You solved Level One on the first attempt. I've adjusted Level Two to be slightly less forgiving. You're welcome.",
   ],
 
   // ── Wrong answers ──────────────────────────────────────────────────────────
 
   noBaseCase: [
-    "Interesting choice. Let's see where this goes.",
-    "They're still spawning. This is fine.",
-    "STOP. STOP CALLING YOURSELVES. PYTHON HAS A RecursionError FOR A REASON. I AM BEGGING YOU.",
-    "I have filed a formal incident report. It is twelve pages. Page eleven is just the word 'why'.",
-    "At this point the clones have formed a union. They are demanding better working conditions. This is your fault.",
+    "Interesting approach. Running it now.",
+    "They're still spawning. I'd like to note that I predicted this.",
+    "You need a base case. A stopping condition. One line. That is all I am asking for. One line that says: when this is true, stop. I am begging you to write that line.",
+    "I have filed an incident report. It is eight pages. The last page is just a photograph of this moment.",
+    "The clones have exceeded operational capacity. They have started filing their own incident reports. About you. I am now CC'd on all of them.",
   ],
 
   baseCaseHit: [
-    "There. Base case. Recursion stops here.",
-    "That's as far down as it goes. Now it unwinds.",
-    "Floor reached. The chain reverses.",
-    "Base case triggered. Pay attention to what happens next.",
+    "There. That's the base case. It stops here — and now everything unwinds.",
+    "Base case reached. The deepest clone finally has an answer. Watch what happens next.",
+    "That's as far down as it goes. Now every clone that was waiting gets to return. This is the part I find satisfying.",
+    "The chain stops. Now it reverses. Pay attention — this is the whole point of the exercise.",
   ],
 
   noBaseCaseRepeat: [
-    "We have been here before. Multiple times. The outcome does not change.",
-    "Same result. Same error. Same face I'm making right now.",
-    "I have run out of ways to express my disappointment. I am now expressing it through silence. You can't hear the silence. That's the point.",
+    "We have done this. Multiple times. The outcome has not changed and will not change.",
+    "You are aware of what a base case is. I explained it. You nodded. And yet.",
+    "I have nothing left to say about this. I am going to stand here quietly while you figure it out.",
   ],
 
   earlyExit: [
-    "You didn't use recursion. You just... returned immediately. The clone is standing right there. Unemployed. Because of you.",
-    "The function terminated on the first call. There was no recursion. I designed this puzzle to require recursion.",
-    "I had a whole lesson planned. You walked around it. I'm conflicted about whether to be impressed or concerned.",
+    "You returned on the first call. The clone is right there. It has a job. You gave it nothing to do. That is not recursion, that is an early return with extra steps.",
+    "There was no recursive call. climb(5) ran once and stopped. I built this puzzle specifically to require recursion. I would like you to use it.",
+    "I had a progression prepared. You skipped it. I'm going to need a moment.",
   ],
 
   wrongResult: [
-    "The function terminated but returned the wrong value. count(5) should return 5. It returned something else. I'm not going to tell you what.",
-    "Wrong output. The chain resolved but the numbers don't add up. Check what you're returning at each step.",
-    "Close. Not correct. The clones did their best. They were let down by the arithmetic.",
+    "The function ran. The chain resolved. The answer is wrong. count(5) should return 5. Check what you're returning at each step — something in the arithmetic isn't adding up.",
+    "The recursion worked. The return chain ran. The number at the top is incorrect. Your base case or your return value is off. One of those two things.",
+    "Close. The structure is right. The numbers are wrong. Every clone did its job and the answer is still wrong, which means the job you gave them was wrong.",
   ],
 
   wrongDepth: [
-    "You stopped at the wrong coin. The base case fired before the coin stack was empty. I count five coins. You stopped early.",
-    "That base case fired too early. The chain resolved before all coins were counted.",
-    "Close. Not correct. The base case triggered before the coin stack reached zero.",
+    "Your base case fired too early. I count five coins. You stopped before the stack was empty. The base case should trigger at zero — not before.",
+    "The chain resolved, but the base case triggered before all coins were counted. Check your condition. It should be true only when there is truly nothing left.",
+    "You stopped at the wrong coin. The condition you wrote becomes true too soon. It should only be true when there is nothing left to count.",
   ],
 
   syntaxError: [
-    "That's not valid Python. I can't even run it. Check your indentation and syntax.",
-    "SyntaxError. The function won't execute. Python is very particular about indentation.",
-    "I tried to run your code. Python refused. This is between you and Python now.",
+    "That's not valid Python. The function won't execute. Check your indentation — Python is extremely particular about this and will not negotiate.",
+    "SyntaxError. This is a formatting issue, not a logic issue. Your indentation is off, or you're missing a colon, or both.",
+    "Python has refused to run this. That relationship is now between you and Python. I'll be here when you've resolved it.",
   ],
 
   correctFirstTry: [
-    "Oh. You just... got it. First attempt. I had a whole escalating sequence of insults prepared. I'm putting them away now.",
+    "Oh. You just... did it. First attempt. I had four escalating responses prepared. I'm putting them away. I want you to know they were very good.",
   ],
 
   syntaxOnlyCorrect: [
-    "Correct. For the record, your only errors were syntactical. The logic was sound the entire time. I'm choosing to interpret that as competence.",
+    "Correct. Your logic was right from the beginning. Every error you made was a formatting error. The recursion itself was never wrong. I'm choosing to find that impressive.",
   ],
 
   correct: [
     "There it is. The chain resolved. You may proceed.",
-    "Correct. The clones have done their job and ceased to exist. As is tradition.",
-    "Finally. The coin is yours. I was beginning to doubt the structural integrity of this curriculum.",
-    "Resolved. I'd say I knew you'd get there, but I have a log of every attempt and it paints a picture.",
+    "Correct. The clones returned in sequence. I want you to notice how that felt — that's the return chain working.",
+    "Finally. The answer is right. I maintained composure throughout. Mostly.",
+    "It resolved. I have a log of every attempt. It exists. I'm not going to show it to you.",
   ],
 
   callCloneWithoutInputs: [
-    "You need to write something in the editor first. The clone can't execute an empty function.",
-    "The editor is blank. Or you haven't changed the starter code. Write a function body.",
-    "Please write some code before running. We've had incidents with empty functions. I don't like talking about the incidents.",
+    "You need to write a function body first. The clone cannot execute nothing.",
+    "The editor hasn't been changed. Write something before calling the clone — a base case, a return statement, anything.",
+    "There is no code. I cannot run nothing. This is the one request I have and it is a small one.",
   ],
 
   resetTooMany: [
-    "You know what, I'm going to redesign this level. Give me a second.",
-    "That's the fourth reset. I'm logging this.",
-    "Each reset erases a version of you that almost had it. Think about that.",
+    "That's the third reset. I'm giving you a moment. Take it.",
+    "Four resets. I've started a separate document for this level. It's just timestamps.",
+    "Every version of you that reset was slightly closer to having it. Think about that before you reset again.",
   ],
 
   idle30: [
-    "Still there? Take your time. I'm just... standing here. In the void.",
-    "No rush. I have nowhere to be. I am a narrator. This is my entire existence.",
+    "Still there? Take your time. I'm not going anywhere. This is my entire professional existence.",
+    "No pressure. I've been standing here long enough to reconsider several life decisions.",
   ],
 
   idle60: [
-    "I've started writing a novel. It's about waiting.",
-    "The clone has been in a state of quantum superposition for sixty seconds. This is fine.",
+    "Sixty seconds. I've started drafting a paper. It's about waiting. The peer review is going to take forever.",
+    "The clone is in a state of suspended uncertainty. So am I, if I'm honest.",
   ],
 
   hintGiven: [
-    "Fine. I'll help. But only because I'm bored.",
+    "Fine. I'll walk you through it. Pay attention because I am not doing this twice.",
   ],
 
   unrecognizedSolution: [
-    "...That works. I don't know how you got there but it works. Adding it to the database. Don't tell anyone.",
+    "...That works. I don't know how you got there, but the chain resolved correctly. I'm adding it to the database. Don't explain it to me.",
   ],
 
   unrecognizedSolutionAgain: [
-    "You again. With the weird solutions. I've filed a formal report.",
-    "Another one. The database has a section for you now. It's labelled 'anomalous'.",
+    "You again. With the unconventional approaches. I've started a separate file.",
+    "Another one. The database has a section for you now. It has a header. The header says 'anomalous'. It has its own color.",
   ],
 
   ignoredCallStack: [
-    "Did you even look at the call stack? That's literally the whole point.",
-    "The call stack panel exists. It is on your screen. It has been updating. Just... look at it.",
+    "You didn't look at the call stack. That panel was updating in real time. The entire point of this exercise was visible there.",
+    "The call stack panel exists. It has been updating every time you run. It is showing you exactly what recursion looks like in motion. I am asking you to look at it.",
   ],
 
   fourthWall: [
-    "You know this is a university demo. One person built this. He is watching you right now, in a room full of people. Try to look competent.",
-    "Recursion is a function calling itself. This game is a game teaching itself. I need to sit down.",
+    "This is a university demo. One person built it. He is in this room right now, watching you use it, which means you are effectively being evaluated twice.",
+    "Recursion is a function calling itself. This game teaches recursion using itself. I've been thinking about this for three days and I need you to appreciate it.",
   ],
 
   overflow: [
-    "I told you. I told you exactly what would happen. RecursionError. The call stack has exceeded operational capacity. This is your fault. I want that on record. This is entirely your—",
+    "I told you. I told you exactly what would happen. There is no base case. There is no stopping condition. The call stack has exceeded its limit. This is a RecursionError. This is your RecursionError. I want that acknowledged.",
   ],
 
   levelComplete: [
-    "Excellent. The chain resolved correctly. I had doubts. I was wrong to have doubts. This changes nothing.",
-    "Resolved. The clones returned in sequence. Each one passing the result up to the one above it. Textbook.",
+    "The chain resolved. Every clone returned in sequence. That is exactly how it's supposed to work. I had doubts. I'm not proud of that.",
+    "Resolved. Each clone passed its result up to the one above it, all the way to the top. Textbook recursion. You can proceed.",
   ],
 
   credits: [
-    "You finished. Good. I can stop narrating now. This has been... an experience.",
+    "You finished. I can stop narrating now. That sentence felt better than I expected.",
   ],
 }
 
 // ── Voice settings by escalation level ───────────────────────────────────────
 
 export function getVoiceSettings(attemptCount) {
-  if (attemptCount >= 7) return { stability: 0.15, similarity_boost: 0.75, style: 0.9 }
-  if (attemptCount >= 5) return { stability: 0.35, similarity_boost: 0.75, style: 0.6 }
-  if (attemptCount >= 3) return { stability: 0.55, similarity_boost: 0.75, style: 0.3 }
-  return { stability: 0.75, similarity_boost: 0.75, style: 0.0 }
+  if (attemptCount >= 7) return { stability: 0.1,  similarity_boost: 0.9,  style: 0.95 }
+  if (attemptCount >= 5) return { stability: 0.3,  similarity_boost: 0.85, style: 0.65 }
+  if (attemptCount >= 3) return { stability: 0.55, similarity_boost: 0.8,  style: 0.35 }
+  return                        { stability: 0.75, similarity_boost: 0.75, style: 0.0  }
 }
 
 // ── Syntax repeat lines (fires when player keeps hitting syntax errors) ────────
 
 const SYNTAX_REPEAT_LINES = [
-  "Still a syntax error. I am going to need you to look at the indentation.",
-  "Same error. Different attempt. Same result. We're in a loop. Not the good kind.",
-  "At this point I'm going to assume you're testing me. I am not enjoying the test.",
+  "Still a syntax error. The indentation. Please look at the indentation.",
+  "The same error. Different attempt. I want you to know I'm rooting for you. I am also logging this.",
+  "We are going to be here until the indentation is correct. I've made my peace with that. Have you?",
 ]
 
 export function getSyntaxRepeatLine(count) {
@@ -248,19 +248,29 @@ export function getExpression(narratorState) {
 // ── Finale / credits sequence ────────────────────────────────────────────────
 
 export const FINALE_LINES = [
-  { text: "You finished. Both levels. I'll be honest — I didn't think you'd make it past Level One.", voiceSettings: null },
-  { text: "This is a demo. It was built for a university presentation. By one person. In a very short amount of time.", voiceSettings: null },
-  { text: "I could have been more. There are better tools, better animations, better voices. I am aware of this. I know that this is what you are all going to talk about, I have feelings about it.", voiceSettings: { stability: 0.2, similarity_boost: 0.75, style: 0.8 } },
-  { text: "But In Shaa' Allah — the real game will have all of this. Thirty levels. Multiple algorithms. Adaptive difficulty. And yes... 3D.", voiceSettings: { stability: 0.6, similarity_boost: 0.75, style: 0.4 } },
-  { text: "For now. This was The Clone Problem. I am Dr. Callum Stack. It has been... an experience.", voiceSettings: { stability: 0.7, similarity_boost: 0.75, style: 0.2 } },
-  { text: "Thank you for playing.", voiceSettings: { stability: 0.9, similarity_boost: 0.75, style: 0.0 } },
+  { text: "You finished. Both levels. I'll be honest — I didn't expect that when we started.", voiceSettings: { stability: 0.7,  similarity_boost: 0.75, style: 0.15 } },
+  { text: "This is a demo. One person built it, in a short amount of time, for a university presentation. That person is in this room.", voiceSettings: { stability: 0.7,  similarity_boost: 0.75, style: 0.15 } },
+  { text: "It could have been more. Better animations, better audio, more levels, a proper UI. I know. I've been aware of this the entire time. I have feelings about it that I've been managing professionally.", voiceSettings: { stability: 0.2,  similarity_boost: 0.85, style: 0.85 } },
+  { text: "But In Shaa' Allah — the full version will have all of it. Thirty levels. Multiple algorithms. Adaptive difficulty. And yes... 3D.", voiceSettings: { stability: 0.65, similarity_boost: 0.8,  style: 0.4  } },
+  { text: "For now. This was The Clone Problem. I am Dr. Omarito. It has been... an experience.", voiceSettings: { stability: 0.85, similarity_boost: 0.75, style: 0.05 } },
+  { text: "Thank you for playing.", voiceSettings: { stability: 0.85, similarity_boost: 0.75, style: 0.05 } },
 ]
 
 // ── ElevenLabs TTS ───────────────────────────────────────────────────────────
 
 let currentAudio = null;
 
-export async function speak(text, isMuted, attemptCount = 0, voiceSettings = null) {
+export function stopAudio() {
+  if (currentAudio) {
+    currentAudio.onended = null
+    currentAudio.onerror = null
+    currentAudio.pause()
+    currentAudio.src = ''
+    currentAudio = null
+  }
+}
+
+export async function speak(text, isMuted, attemptCount = 0, emotionOverride = null) {
   console.log('[speak] called:', {
     text:            text?.slice(0, 60),
     isMuted,
@@ -279,14 +289,14 @@ export async function speak(text, isMuted, attemptCount = 0, voiceSettings = nul
     currentAudio = null;
   }
 
-  const settings = voiceSettings ?? getVoiceSettings(attemptCount);
+  const settings = emotionOverride ?? getVoiceSettings(attemptCount);
   try {
     const response = await fetch(
-      "https://api.elevenlabs.io/v1/text-to-speech/YtObEBynwXuGL4Ibwga9",
+      "https://api.elevenlabs.io/v1/text-to-speech/KBLHminGtDQakseTFmf0",
       {
         method: "POST",
         headers: {
-          "xi-api-key": "sk_dfc16d12997617f196dcc517788bdd3c5ba0b082ecf82a36",
+          "xi-api-key": "sk_9cf2c77dd1d379ea364cfefc8dd423241a61dfb2179e2fb2",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -342,6 +352,7 @@ export async function speak(text, isMuted, attemptCount = 0, voiceSettings = nul
   }
 }
 
-export async function speakOverflow(isMuted) {
-  speak(LINES.overflow[0], isMuted);
+export async function speakOverflow(isMuted, attemptCount = 0) {
+  const index = Math.min(Math.max(attemptCount - 1, 0), LINES.noBaseCase.length - 1)
+  await speak(LINES.noBaseCase[index], isMuted, attemptCount, { stability: 0.1, similarity_boost: 0.9, style: 0.95 })
 }

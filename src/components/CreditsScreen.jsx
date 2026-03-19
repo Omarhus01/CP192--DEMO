@@ -44,7 +44,7 @@ function UnhingedPortrait() {
         </div>
         <div className={`${styles.mouth} ${styles.mouthUnhinged}`} />
       </div>
-      <div className={styles.portraitName}>Dr. Callum Stack</div>
+      <div className={styles.portraitName}>Omarito</div>
       <div className={styles.portraitTitle}>Head of Theoretical Clone Operations</div>
     </div>
   )
@@ -84,13 +84,14 @@ export default function CreditsScreen({ isMuted }) {
   async function handlePlayAgain() {
     setShowButtons(false)
     setPlayAgainMode(true)
-    const line1 = "Again? AGAIN? Did you not just hear what I said? This is a DEMO. Close the tab. Come back when we are done."
+    const angryEmotion = { stability: 0.05, similarity_boost: 0.9, style: 1.0 }
+    const line1 = "Again? …AGAIN???! Did you not just hear what I said? This is a DEMO. Close the tab. Come back when we are done."
     setPlayAgainLine(line1)
-    await speak(line1, isMutedRef.current, 0)
+    await speak(line1, isMutedRef.current, 0, angryEmotion)
     await new Promise(r => setTimeout(r, 2000))
     const line2 = "...I'm serious. Close it."
     setPlayAgainLine(line2)
-    await speak(line2, isMutedRef.current, 0)
+    await speak(line2, isMutedRef.current, 0, angryEmotion)
     await new Promise(r => setTimeout(r, 500))
     setShowExit(true)
   }
@@ -132,7 +133,7 @@ export default function CreditsScreen({ isMuted }) {
           </div>
           <div className={styles.mouth} />
         </div>
-        <div className={styles.portraitName}>Dr. Callum Stack</div>
+        <div className={styles.portraitName}>Omarito</div>
         <div className={styles.portraitTitle}>Head of Theoretical Clone Operations</div>
       </div>
 

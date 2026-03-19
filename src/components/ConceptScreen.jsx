@@ -29,16 +29,16 @@ const STEP_BG = [
 ]
 
 const STEP_LINES = [
-  "Imagine someone hands you a box. Inside that box is another box. Inside that box is another box. This continues until you find a box small enough to open directly. That is recursion.",
-  "You are at the back of a queue. You want to know how many people are ahead of you. You ask the person in front. They do not know either. So they ask the person in front of them. This continues until the person at the front says: nobody is ahead of me. The answer is zero. Then the answer travels back.",
-  "The person at the front who says zero — that is the base case. The stopping condition. Without it, everyone asks forever and nobody gets an answer. The rest — asking the person in front — that is the recursive case. One small step that repeats.",
-  "Once the front person answers, the answer travels back. Each person adds one to what they heard and passes it back. The person at the back gets the final count. This is the return chain.",
-  "Here is the same logic in Python. A function that counts how many people are ahead of you in a queue.",
-  "Before we proceed. One question.",
-  "Good. You understand the concept. Now you will apply it. The levels ahead use the same logic — base case, recursive call, return chain. The only difference is you have to write it.",
+  "Imagine someone hands you a box. Inside that box is another box. Inside that box is another box. This continues until you find one small enough to open directly. That's not a metaphor. That is exactly how recursion works.",
+  "You're at the back of a queue. You want to know how many people are ahead of you. You ask the person in front. They don't know either. So they ask the person in front of them. This continues until someone at the front says: nobody is ahead of me. Zero. Then the answer travels back.",
+  "The person at the front — the one who says zero without asking anyone — that's the base case. The stopping condition. Without it, everyone asks forever and the answer never comes. The rest of them, the ones who ask and wait — that's the recursive case.",
+  "Once the answer starts traveling back, each person adds one and passes it on. The person at the back gets the full count. That journey back — that is the return chain. Every recursive function has one.",
+  "Here is the same logic in Python. A function that counts how many people are in the queue ahead of you. Read each line.",
+  "Before we go any further. One question.",
+  "Good. You understand the concept. What comes next is the same logic — base case, recursive call, return chain — except you're writing it. The levels ahead will not explain it again.",
 ]
 
-const LINE_7B = "One more thing. Look at the call stack panel when you play. Everything I just explained will be visible there in real time. Do not ignore it."
+const LINE_7B = "One more thing. The call stack panel — that panel on the right in the game — shows every function call as it happens. Everything I just explained will be visible there in real time. Do not ignore it."
 
 const STEP_BUTTON_LABELS = [
   'I see it',
@@ -342,7 +342,7 @@ function LabelStep({ onUnlock, onNarrate, isMuted }) {
         setBasePlaced(true)
         setSelected(null)
       } else {
-        const msg = "No. The base case is the one who already knows the answer. The person at the front."
+        const msg = "No. The base case is the one who already has the answer — the person at the front who doesn't need to ask anyone."
         onNarrate(msg)
         speak(msg, isMutedRef.current)
         triggerShake('base')
@@ -353,7 +353,7 @@ function LabelStep({ onUnlock, onNarrate, isMuted }) {
         setRecursivePlaced(true)
         setSelected(null)
       } else {
-        const msg = "No. The recursive case asks someone else. The front person already has the answer."
+        const msg = "No. The recursive case is everyone who asks the person ahead of them. That's everyone except the front person."
         onNarrate(msg)
         speak(msg, isMutedRef.current)
         triggerShake('recursive')
@@ -519,10 +519,10 @@ function QueueReturnStep({ onUnlock }) {
 // ── Step 5: Code block ────────────────────────────────────────────────────────
 
 const CODE_LINES = [
-  { text: 'def count_ahead(position):',                              type: 'def',    note: 'The function takes a position — where in the queue you are.' },
-  { text: '    if position == 0:',                                   type: 'base',   note: "If you are at the front — position zero — nobody is ahead. Return zero.", comment: '# base case',     commentKey: 'base' },
+  { text: 'def count_ahead(position):',                              type: 'def',    note: 'The function takes a position — how far from the front you are.' },
+  { text: '    if position == 0:',                                   type: 'base',   note: "If your position is zero, you're at the front. Nobody is ahead of you. Return zero — that's your base case.", comment: '# base case',     commentKey: 'base' },
   { text: '        return 0',                                        type: 'return', note: null },
-  { text: '    return 1 + count_ahead(position - 1)',                type: 'recurse', note: 'One person is directly ahead of you, plus however many are ahead of them.', comment: '# recursive case', commentKey: 'recursive' },
+  { text: '    return 1 + count_ahead(position - 1)',                type: 'recurse', note: 'Otherwise: one person is directly ahead of you, plus however many are ahead of them. That is 1 plus count_ahead of position minus 1.', comment: '# recursive case', commentKey: 'recursive' },
 ]
 
 function CodeStep({ onUnlock, onNarrate, isMuted }) {
@@ -534,18 +534,25 @@ function CodeStep({ onUnlock, onNarrate, isMuted }) {
 
   const allVisible = visibleLines >= CODE_LINES.length
 
-  // Reveal lines one by one, narrate note for each
+  // Reveal lines one by one, gated on audio completion
   useEffect(() => {
     if (visibleLines >= CODE_LINES.length) return
-    const t = setTimeout(() => {
+    let cancelled = false
+    async function revealNext() {
+      // First line: let the step-intro audio start before interrupting it
+      if (visibleLines === 0) await new Promise(r => setTimeout(r, 950))
+      if (cancelled) return
       const line = CODE_LINES[visibleLines]
       if (line?.note) {
         onNarrate(line.note)
-        speak(line.note, isMutedRef.current)
+        await speak(line.note, isMutedRef.current)
+      } else {
+        await new Promise(r => setTimeout(r, 400))
       }
-      setVisibleLines(v => v + 1)
-    }, 950)
-    return () => clearTimeout(t)
+      if (!cancelled) setVisibleLines(v => v + 1)
+    }
+    revealNext()
+    return () => { cancelled = true }
   }, [visibleLines]) // eslint-disable-line
 
   // Unlock when both comments clicked
@@ -627,13 +634,13 @@ function QuizStep({ onUnlock, onNarrate, isMuted }) {
 
     if (option.correct) {
       setStatus('correct')
-      const msg = "Correct. That is a stack overflow. You will see one shortly. I apologize in advance."
+      const msg = "Correct. That's a stack overflow. Python calls it a RecursionError. You're about to see one. I apologize in advance."
       onNarrate(msg)
       speak(msg, isMutedRef.current)
       setTimeout(() => onUnlock(), 1100)
     } else {
       setStatus('wrong')
-      const msg = "No. Think about it. If there is no stopping condition... what stops it?"
+      const msg = "No. Think about it. If there's no stopping condition — no base case — what stops the function from calling itself?"
       onNarrate(msg)
       speak(msg, isMutedRef.current)
       setTimeout(() => { setSelected(null); setStatus('idle') }, 1500)

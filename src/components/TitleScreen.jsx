@@ -27,7 +27,7 @@ export default function TitleScreen({ onStart }) {
         <div className={styles.subtitle}>
           A theoretical exercise in recursive self-replication.
           <br />
-          Dr. Callum Stack, presiding.
+          Dr. Omarito, presiding.
         </div>
 
         <div className={styles.divider}>

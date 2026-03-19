@@ -29,7 +29,7 @@ function Portrait({ expression, bobbing }) {
           <div className={styles.static} />
         )}
       </div>
-      <div className={styles.portraitLabel}>DR. CALLUM STACK</div>
+      <div className={styles.portraitLabel}>OMARITO</div>
     </div>
   )
 }

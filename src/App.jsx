@@ -8,7 +8,7 @@ import ConceptScreen  from './components/ConceptScreen.jsx'
 import CreditsScreen  from './components/CreditsScreen.jsx'
 import { level1 }     from './levels/level1.js'
 import { level2 }     from './levels/level2.js'
-import { getLine, getExpression, speak, LINES } from './systems/narratorSystem.js'
+import { getLine, getExpression, speak, stopAudio, LINES } from './systems/narratorSystem.js'
 import { initMusic, playTrack, fadeInTrack, setMuted as setMusicMuted, playNarratorClick } from './systems/audioSystem.js'
 import styles from './App.module.css'
 
@@ -173,6 +173,7 @@ const [transitioning,        setTransitioning]        = useState(false)
       setLevelIndex(next)
       navigateTo('level')
     } else {
+      stopAudio()
       navigateTo('credits')
     }
   }
@@ -229,7 +230,7 @@ const [transitioning,        setTransitioning]        = useState(false)
       )}
 
       {screen === 'overflow' && (
-        <StackOverflow onRestart={handleRestartFromOverflow} isMuted={isMuted} />
+        <StackOverflow onRestart={handleRestartFromOverflow} isMuted={isMuted} attemptCount={narratorState.attemptCount} />
       )}
 
       {screen === 'credits' && (

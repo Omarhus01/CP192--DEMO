@@ -13,15 +13,15 @@ export const level2 = {
 
   // ── Guided phase ──────────────────────────────────────────────────────────
   guidedSteps: [
-    { text: "Five coins. Your function picks up one coin at a time. Each clone picks one up and asks the clone below it to count the rest.", highlight: 'scene' },
-    { text: "This time your function must return a value — the number of coins counted. Each clone adds 1 to what the clone below returned. Watch what travels back up.", highlight: 'callstack' },
-    { text: "Base case: if there are zero coins, return 0. Recursive case: return 1 plus count of coins minus 1. Think about why those two pieces produce the total.", highlight: 'editor' },
+    { text: "Five coins. Your function picks one up, then asks a clone to count the rest. Each clone does the same — picks one up, asks the next clone to count what's left. This continues until there are no coins left.", highlight: 'scene' },
+    { text: "This time, your function has to return something — the number of coins counted. Each clone returns 1 plus what the clone below it returned. The base case returns 0. Pay attention to what travels back up.", highlight: 'callstack' },
+    { text: "Base case: if coins equals zero, return 0. There's nothing left to count. Recursive case: return 1 plus count(coins minus 1). One coin here, plus however many are below. That's the whole structure.", highlight: 'editor' },
   ],
 
-  scaffoldIntroLine: "You've seen how it works. Fill in the four blanks. Think carefully about what each one should be.",
+  scaffoldIntroLine: "You've seen it run. Now fill in the four blanks. Think about what each position needs to be.",
   scaffoldTemplate: "if coins == ___:\n    return ___\nreturn ___ + count(___)",
-  scaffoldWrongLine: "Not quite. Check your return values. count(0) should return 0, and the recursive case should return 1 + count of a smaller input.",
-  freePhaseIntro: "You've seen it. Now write it yourself without the scaffolding.",
+  scaffoldWrongLine: "Not quite. count(0) returns 0. The recursive case returns 1 plus count of a smaller number. Check both.",
+  freePhaseIntro: "You've seen the structure. Now write it yourself.",
 
   starterCode: `    # count(5) should return 5
     # count(0) is your base case — return 0
@@ -37,9 +37,7 @@ Then the returns bubbled up: count(0) returned 0, count(1) returned 1, count(2) 
 
 Each call waited for the one below it, then added 1 to the result. That is how recursive functions return values.`,
 
-  hint: `    if coins == ___:   # base case: no coins left
-        return ___          # nothing to count
-    return ___ + count(coins - ___)  # one coin plus the rest`,
+  hint: `The base case is: if coins == 0, return 0. No coins left means nothing to count. The recursive case is: return 1 + count(coins - 1). You're holding one coin, and a clone is counting the rest. Add them together. That is the entire function. You now have the answer. Use it.`,
 
   scene: {
     coinCount: 5,

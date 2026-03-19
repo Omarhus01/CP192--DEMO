@@ -64,7 +64,7 @@ export default function OnboardingQuiz({ onAnswer }) {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            — Dr. Stack is processing your answer —
+            — Dr. Omarito is processing your answer —
           </motion.div>
         )}
       </motion.div>

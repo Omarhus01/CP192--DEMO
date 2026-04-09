@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Clone Problem — Oral Defense</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:     #0d0c1d;
+      --text:   #f0efff;
+      --dim:    #7c7a9a;
+      --orange: #f97316;
+      --blue:   #2563eb;
+      --green:  #16a34a;
+      --red:    #dc2626;
+      --purple: #a855f7;
+      --border: rgba(255,255,255,0.08);
+      --card:   rgba(255,255,255,0.04);
+      --font:   'Space Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+
+    body {
+      background: var(--bg);
+      font-family: var(--font);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(249,115,22,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,99,235,0.025) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Deck ── */
+    #deck { flex: 1; position: relative; overflow: hidden; }
+
+    .slide {
+      position: absolute; inset: 0;
+      padding: 52px 80px 40px;
+      display: flex; flex-direction: column; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s ease;
+      z-index: 1;
+    }
+    .slide.active { opacity: 1; pointer-events: all; }
+
+    /* ── Nav bar ── */
+    #nav {
+      display: flex; align-items: center; justify-content: center;
+      gap: 20px; padding: 12px 24px;
+      border-top: 1px solid var(--border);
+      z-index: 10;
+    }
+    #nav button {
+      font-family: var(--font); font-size: 11px; letter-spacing: 2px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--dim); padding: 6px 16px; cursor: pointer;
+      border-radius: 2px; transition: all 0.15s;
+    }
+    #nav button:hover { border-color: var(--orange); color: var(--orange); }
+    #ctr { font-size: 10px; letter-spacing: 3px; color: var(--dim); min-width: 60px; text-align: center; }
+    #hint { font-size: 9px; letter-spacing: 1px; color: rgba(255,255,255,0.15); }
+
+    /* ── Corner decorations ── */
+    .ctL, .cBR { position: absolute; width: 36px; height: 36px; }
+    .ctL { top: 24px; left: 40px; border-top: 2px solid var(--blue); border-left: 2px solid var(--blue); }
+    .cBR { bottom: 12px; right: 40px; border-bottom: 2px solid var(--orange); border-right: 2px solid var(--orange); }
+
+    /* ── Type ── */
+    .tag {
+      font-size: 9px; letter-spacing: 3px; color: var(--orange);
+      border: 1px solid rgba(249,115,22,0.4); padding: 3px 12px;
+      border-radius: 2px; display: inline-block; margin-bottom: 18px;
+    }
+
+    h1 { font-size: 58px; line-height: 1.05; font-weight: 700; letter-spacing: 2px; }
+    h2 { font-size: 34px; line-height: 1.15; font-weight: 700; letter-spacing: 1px; }
+    h3 { font-size: 15px; font-weight: 700; letter-spacing: 1px; }
+
+    .acc  { color: var(--orange); }
+    .blu  { color: var(--blue); }
+    .grn  { color: var(--green); }
+    .dim  { color: var(--dim); }
+    .purp { color: var(--purple); }
+
+    p { font-size: 14px; line-height: 1.85; color: var(--dim); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 4px; padding: 18px 20px;
+    }
+    .card-o { border-color: rgba(249,115,22,0.35); }
+    .card-b { border-color: rgba(37,99,235,0.35); }
+    .card-g { border-color: rgba(22,163,74,0.35); background: rgba(22,163,74,0.04); }
+    .card-r { border-color: rgba(220,38,38,0.3); }
+
+    /* ── Grids ── */
+    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+    /* ── Divider ── */
+    .div { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* ── Flow diagram ── */
+    .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .fbox {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 3px; padding: 7px 12px;
+      font-size: 10px; letter-spacing: 1px; line-height: 1.5;
+      white-space: nowrap;
+    }
+    .fbox.hi  { border-color: var(--orange); color: var(--orange); }
+    .fbox.new { border-color: var(--blue); color: var(--blue); }
+    .farr     { color: var(--dim); font-size: 14px; }
+
+    /* ── Code ── */
+    .codeblock {
+      background: rgba(0,0,0,0.35); border: 1px solid var(--border);
+      border-radius: 3px; padding: 12px 16px;
+    }
+    .cl { font-size: 11px; line-height: 1.9; }
+    .kw { color: #c084fc; }
+    .fn { color: #60a5fa; }
+    .nm { color: var(--orange); }
+    .cm { color: #374151; }
+
+    /* ── Level screen mockup ── */
+    .screen-mock { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .sm-bar {
+      background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--border);
+      padding: 6px 14px; font-size: 9px; letter-spacing: 2px; color: var(--dim);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sm-bar .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }
+    .sm-cols { display: grid; grid-template-columns: 1fr 1.3fr 0.75fr; }
+    .sm-col {
+      padding: 12px; border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .sm-col:last-child { border-right: none; background: #050412; }
+    .sm-lbl { font-size: 8px; letter-spacing: 2px; color: var(--dim); margin-bottom: 10px; }
+
+    /* clone figures */
+    .clone-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .clone { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .c-head { border-radius: 50%; background: var(--orange); }
+    .c-body { background: var(--orange); border-radius: 2px; opacity: 0.85; }
+
+    .stack-row {
+      font-size: 9px; letter-spacing: 1px; padding: 4px 8px;
+      border-left: 2px solid var(--border); margin-bottom: 4px;
+      color: var(--dim);
+    }
+    .stack-row.active { border-color: var(--orange); color: var(--orange); }
+    .stack-row.ret   { border-color: var(--green); color: var(--green); }
+
+    /* ── Narrator bar ── */
+    .narrator {
+      background: #08071a; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px; padding: 12px 16px;
+      display: flex; align-items: center; gap: 14px; margin-top: 14px;
+    }
+    .n-port {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(249,115,22,0.15); border: 2px solid var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .n-text { font-size: 10px; line-height: 1.7; color: var(--text); font-style: italic; }
+
+    /* ── Login mockup ── */
+    .lmock { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; font-size: 11px; }
+    .lm-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .lm-tab {
+      flex: 1; padding: 8px; text-align: center;
+      font-size: 9px; letter-spacing: 2px; color: var(--dim);
+      background: rgba(255,255,255,0.02);
+    }
+    .lm-tab.on { color: var(--blue); border-bottom: 2px solid var(--blue); background: transparent; }
+    .lm-body { padding: 14px; }
+    .ml { font-size: 8px; letter-spacing: 2px; color: var(--dim); margin: 8px 0 3px; }
+    .mi {
+      width: 100%; background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); border-radius: 2px;
+      padding: 5px 10px; font-size: 10px; color: var(--dim);
+      font-family: var(--font);
+    }
+    .mb {
+      width: 100%; margin-top: 10px; padding: 8px; background: var(--blue);
+      border-radius: 2px; font-size: 9px; letter-spacing: 2px;
+      color: #fff; text-align: center;
+    }
+    .mg {
+      width: 100%; margin-top: 6px; padding: 7px;
+      border: 1px solid var(--border); border-radius: 2px;
+      font-size: 9px; letter-spacing: 2px; color: var(--dim); text-align: center;
+    }
+
+    /* ── Dashboard level cards ── */
+    .lcard {
+      border: 1px solid var(--border); border-radius: 3px;
+      padding: 9px; font-size: 9px; background: var(--card);
+    }
+    .lcard.done { border-color: var(--green); background: rgba(22,163,74,0.06); }
+    .lcard.nxt  { border-color: var(--blue);  background: rgba(37,99,235,0.06); }
+    .lcard.lck  { opacity: 0.35; }
+    .lc-n  { font-size: 8px; letter-spacing: 2px; color: var(--dim); margin-bottom: 3px; }
+    .lc-t  { font-weight: 700; letter-spacing: 1px; margin-bottom: 2px; }
+    .lc-s  { font-size: 8px; color: var(--dim); margin-bottom: 5px; }
+    .lc-b  { font-size: 8px; }
+    .lc-bd { color: var(--green); }
+    .lc-bn { color: var(--blue); }
+
+    /* ── Progress bar ── */
+    .pb-row { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 2px; color: var(--dim); margin-bottom: 5px; }
+    .pb { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-bottom: 12px; border: 1px solid var(--border); }
+    .pbf { height: 100%; background: var(--green); border-radius: 3px; }
+
+    /* ── Steps ── */
+    .step { display: flex; gap: 18px; align-items: flex-start; }
+    .s-num { font-size: 26px; font-weight: 700; color: var(--orange); min-width: 38px; line-height: 1; }
+    .s-body h3 { margin-bottom: 5px; }
+    .s-body p  { font-size: 13px; }
+
+    /* ── Strength/limit list ── */
+    li { list-style: none; font-size: 14px; line-height: 2.1; }
+    .ok  { color: var(--green);  margin-right: 8px; }
+    .no  { color: var(--red);    margin-right: 8px; }
+  </style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 1 — TITLE
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide active">
+    <div class="ctL"></div><div class="cBR"></div>
+    <div style="max-width:680px">
+      <div class="tag">CP-192 // MINI-CAPSTONE ORAL DEFENSE</div>
+      <h1>THE CLONE<br><span class="acc">PROBLEM</span></h1>
+      <p style="font-size:18px; color:var(--text); margin-top:16px; line-height:1.7;">
+        An educational game that teaches recursion<br>by making it visible.
+      </p>
+      <div class="div" style="width:180px; margin-top:28px;"></div>
+      <p style="font-size:13px;">Omar Ibrahim &nbsp;·&nbsp; CP192 &nbsp;·&nbsp; Spring 2026</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 2 — THE PROBLEM
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="ctL"></div><div class="cBR"></div>
+    <div class="tag">THE PROBLEM</div>
+    <h2 style="margin-bottom:28px;">
+      Students can <span class="acc">write</span> recursion.<br>
+      They struggle to explain <span class="dim">why it works.</span>
+    </h2>
+    <div class="g3">
+      <div class="card">
+        <p style="font-size:28px; margin-bottom:10px;">📖</p>
+        <h3 style="margin-bottom:8px;">TEXTBOOKS</h3>
+        <p>Show you the syntax. Don't show you the call stack unwinding.</p>
+      </div>
+      <div class="card card-o">
+        <p style="font-size:28px; margin-bottom:10px;">🧠</p>
+        <h3 style="color:var(--orange); margin-bottom:8px;">THE GAP</h3>
+        <p>Understanding <em>why</em> each call waits, and how values travel back up the chain.</p>
+      </div>
+      <div class="card card-b">
+        <p style="font-size:28px; margin-bottom:10px;">🎮</p>
+        <h3 style="color:var(--blue); margin-bottom:8px;">THE ANSWER</h3>
+        <p>Make recursion <em>visible.</em> Let students watch it happen — not just read about it.</p>
+      </div>
+    </div>
+    <p style="margin-top:24px; font-size:15px; color:var(--text); font-style:italic;">
+      "You don't read about recursion. You watch it happen."
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 3 — WHAT I BUILT
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="ctL"></div><div class="cBR"></div>
+    <div class="tag">WHAT I BUILT</div>
+    <h2 style="margin-bottom:22px;">A complete game. <span class="dim" style="font-size:22px;">Two levels. Full loop.</span></h2>
+
+    <div class="flow" style="margin-bottom:24px;">
+      <div class="fbox new">LOGIN /<br>SIGN UP</div><div class="farr">→</div>
+      <div class="fbox new">PROGRESS<br>DASHBOARD</div><div class="farr">→</div>
+      <div class="fbox">CONCEPT<br>SCREEN</div><div class="farr">→</div>
+      <div class="fbox hi">L1: THE<br>FLOORS</div><div class="farr">→</div>
+      <div class="fbox hi">L2: COIN<br>STACK</div><div class="farr">→</div>
+      <div class="fbox">CREDITS</div>
+    </div>
+
+    <div class="g3">
+      <div class="card">
+        <h3 style="color:var(--orange); font-size:12px; margin-bottom:8px;">▸ PYTHON EDITOR</h3>
+        <p style="font-size:12px;">Skulpt runs real Python in the browser. Syntax highlighting, error feedback, no install needed.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--blue); font-size:12px; margin-bottom:8px;">▸ LIVE CALL STACK</h3>
+        <p style="font-size:12px;">Every recursive call appears as it happens. Base case lights up. Return chain unwinds visually.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--purple); font-size:12px; margin-bottom:8px;">▸ DR. OMARITO</h3>
+        <p style="font-size:12px;">AI narrator. Reacts to mistakes, escalates with attempts, breaks the fourth wall.</p>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-top:16px;">
+      <div class="card">
+        <h3 style="color:var(--green); font-size:12px; margin-bottom:8px;">▸ PLATFORM LAYER</h3>
+        <p style="font-size:12px;">Login / Sign Up. localStorage persistence. Progress dashboard with sequential level unlock.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--orange); font-size:12px; margin-bottom:8px;">▸ 3-PHASE SCAFFOLDING</h3>
+        <p style="font-size:12px;">Guided walkthrough → Fill the blanks → Write from scratch. Difficulty earns itself.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 4 — THE LEARNING PIPELINE
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="ctL"></div><div class="cBR"></div>
+    <div class="tag">THE LEARNING PIPELINE</div>
+    <h2 style="margin-bottom:26px;">Three phases. <span class="acc">One concept.</span> Mastery by the end.</h2>
+
+    <div class="g3" style="margin-bottom:22px;">
+      <div class="card card-o">
+        <div style="font-size:10px; letter-spacing:2px; color:var(--orange); margin-bottom:10px;">01 — GUIDED</div>
+        <h3 style="font-size:14px; margin-bottom:8px;">Walkthrough</h3>
+        <p style="font-size:13px;">Dr. Omarito narrates each step. Clones animate live. Call stack updates in real time. Player just observes.</p>
+      </div>
+      <div class="card card-b">
+        <div style="font-size:10px; letter-spacing:2px; color:var(--blue); margin-bottom:10px;">02 — SCAFFOLD</div>
+        <h3 style="font-size:14px; margin-bottom:8px;">Fill the Gaps</h3>
+        <p style="font-size:13px;">Template provided. Player fills in the base case and recursive call. Hints available after 2 wrong attempts.</p>
+      </div>
+      <div class="card card-g">
+        <div style="font-size:10px; letter-spacing:2px; color:var(--green); margin-bottom:10px;">03 — FREE</div>
+        <h3 style="font-size:14px; margin-bottom:8px;">Write It Yourself</h3>
+        <p style="font-size:13px;">Blank editor. Full function from scratch. This is where the learning actually sticks.</p>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div>
+        <p style="font-size:10px; letter-spacing:2px; color:var(--dim); margin-bottom:8px;">LEVEL 1 — THE FLOORS</p>
+        <div class="codeblock">
+          <div class="cl"><span class="kw">def</span> <span class="fn">climb</span>(floors):</div>
+          <div class="cl">&nbsp;&nbsp;<span class="kw">if</span> floors &lt;= <span class="nm">1</span>: <span class="cm">  # base case</span></div>
+          <div class="cl">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="kw">True</span></div>
+          <div class="cl">&nbsp;&nbsp;<span class="kw">return</span> <span class="fn">climb</span>(floors - <span class="nm">1</span>)</div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:10px; letter-spacing:2px; color:var(--dim); margin-bottom:8px;">LEVEL 2 — THE COIN STACK</p>
+        <div class="codeblock">
+          <div class="cl"><span class="kw">def</span> <span class="fn">count</span>(coins):</div>
+          <div class="cl">&nbsp;&nbsp;<span class="kw">if</span> coins == <span class="nm">0</span>: <span class="cm">  # base case</span></div>
+          <div class="cl">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="nm">0</span></div>
+          <div class="cl">&nbsp;&nbsp;<span class="kw">return</span> <span class="nm">1</span> + <span class="fn">count</span>(coins - <span class="nm">1</span>)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 5 — THE VISUAL MECHANIC
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="ctL"></div><div class="cBR"></div>
+    <div class="tag">THE VISUAL MECHANIC</div>
+    <h2 style="margin-bottom:18px;">The call stack. <span class="acc">Live. As it happens.</span></h2>
+
+    <div style="display:grid; grid-template-columns:1.25fr 1fr; gap:16px;">
+      <div>
+        <p style="font-size:9px; letter-spacing:2px; color:var(--dim); margin-bottom:8px;">LEVEL 2 — THE COIN STACK (FREE PHASE)</p>
+        <img src="screenshots/level2.png"
+             style="width:100%; border-radius:4px; border:1px solid rgba(255,255,255,0.12);
+                    box-shadow:0 8px 32px rgba(0,0,0,0.7); max-height:56vh;
+                    object-fit:cover; object-position:top; display:block;" />
+      </div>
+      <div>
+        <p style="font-size:9px; letter-spacing:2px; color:var(--dim); margin-bottom:8px;">LEVEL 1 — THE FLOORS (GUIDED PHASE)</p>
+        <img src="screenshots/level1.png"
+             style="width:100%; border-radius:4px; border:1px solid rgba(255,255,255,0.12);
+                    box-shadow:0 8px 32px rgba(0,0,0,0.7); max-height:56vh;
+                    object-fit:cover; object-position:top; display:block;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 6 — PLATFORM FEATURES
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="ctL"></div><div class="cBR"></div>
+    <div class="tag">PLATFORM FEATURES</div>
+    <h2 style="margin-bottom:20px;">More than a game. <span class="acc">A learning platform.</span></h2>
+
+    <div class="g2">
+
+      <div>
+        <p style="font-size:10px; letter-spacing:2px; color:var(--dim); margin-bottom:10px;">LOGIN / SIGN UP</p>
+        <img src="screenshots/login.png"
+             style="width:100%; border-radius:4px; border:1px solid rgba(255,255,255,0.12);
+                    box-shadow:0 8px 32px rgba(0,0,0,0.7); display:block;" />
+        <p style="font-size:11px; margin-top:10px; color:var(--dim);">
+          Saved via localStorage. Sign Up → full orientation. Log In → dashboard with real progress.
+        </p>
+      </div>
+
+      <div>
+        <p style="font-size:10px; letter-spacing:2px; color:var(--dim); margin-bottom:10px;">PROGRESS DASHBOARD</p>
+        <img src="screenshots/dashboard.png"
+             style="width:100%; border-radius:4px; border:1px solid rgba(255,255,255,0.12);
+                    box-shadow:0 8px 32px rgba(0,0,0,0.7); display:block;" />
+        <p style="font-size:11px; margin-top:10px; color:var(--dim);">
+          Levels unlock sequentially. Clicking a locked level triggers a narrator response.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 7 — STRENGTHS & LIMITATIONS
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="ctL"></div><div class="cBR"></div>
+    <div class="tag">STRENGTHS & LIMITATIONS</div>
+    <h2 style="margin-bottom:28px;">What <span class="grn">worked</span> — and what <span style="color:var(--red)">didn't yet.</span></h2>
+
+    <div class="g2">
+      <div class="card card-g">
+        <h3 style="color:var(--green); font-size:13px; margin-bottom:16px;">STRENGTHS</h3>
+        <ul>
+          <li><span class="ok">✓</span>Visual mechanic makes recursion concrete</li>
+          <li><span class="ok">✓</span>Narrator makes failure funny, not frustrating</li>
+          <li><span class="ok">✓</span>Full game loop — not a throwaway prototype</li>
+          <li><span class="ok">✓</span>Scaffolded phases build genuine mastery</li>
+          <li><span class="ok">✓</span>20+ edge case reactions</li>
+          <li><span class="ok">✓</span>Real persistence via localStorage</li>
+        </ul>
+      </div>
+      <div class="card card-r">
+        <h3 style="color:var(--red); font-size:13px; margin-bottom:16px;">LIMITATIONS</h3>
+        <ul>
+          <li><span class="no">✗</span>Only 2 of 8 planned levels built</li>
+          <li><span class="no">✗</span>No real backend or authentication</li>
+          <li><span class="no">✗</span>Desktop-only, no mobile support</li>
+          <li><span class="no">✗</span>No user study or learning outcome data</li>
+          <li><span class="no">✗</span>No analytics or progress tracking metrics</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 8 — WHAT'S NEXT
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="ctL"></div><div class="cBR"></div>
+    <div class="tag">WHAT'S NEXT</div>
+    <h2 style="margin-bottom:32px;">In the upcoming days, — <span class="acc">I will update the game more:</span></h2>
+
+    <div style="display:flex; flex-direction:column; gap:26px; max-width:680px;">
+      <div class="step">
+        <div class="s-num">01</div>
+        <div class="s-body">
+          <h3 style="margin-bottom:6px;">User Testing</h3>
+          <p>5 students, pre/post assessment. Measure whether the visual mechanic actually improves understanding vs. a textbook.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="s-num">02</div>
+        <div class="s-body">
+          <h3 style="margin-bottom:6px;">Levels 3–8</h3>
+          <p>Fibonacci (multiple calls), Binary Search (divide & conquer), Tree Traversal, Merge Sort, Memoization — each with a distinct visual.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="s-num">03</div>
+        <div class="s-body">
+          <h3 style="margin-bottom:6px;">Full Platform — In Shaa' Allah</h3>
+          <p>Beyond recursion: sorting, searching, graphs, dynamic programming. A complete visual CS fundamentals course.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SLIDE 9 — CLOSE
+  ══════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="ctL"></div><div class="cBR"></div>
+    <div style="text-align:center; max-width:680px; margin:0 auto;">
+      <div style="font-size:44px; margin-bottom:24px; color:var(--orange);">✦</div>
+      <h2 style="font-size:40px; line-height:1.35; margin-bottom:20px;">
+        The best way to understand recursion<br>
+        is to <span class="acc">watch it happen.</span>
+      </h2>
+      <div class="div" style="width:160px; margin:28px auto;"></div>
+      <p style="font-size:16px; color:var(--text);">CodeCraft — visual mechanics, scaffolded learning, learning through play.</p>
+      <p style="font-size:12px; margin-top:14px; color:var(--dim);">Questions & feedback welcome</p>
+      <img src="screenshots/credits.png"
+           style="width:260px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);
+                  box-shadow:0 8px 32px rgba(0,0,0,0.8); margin-top:24px; display:inline-block;" />
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<div id="nav">
+  <button onclick="go(cur-1)">← PREV</button>
+  <span id="ctr">1 / 9</span>
+  <button onclick="go(cur+1)">NEXT →</button>
+  <span id="hint">arrow keys · space · click</span>
+</div>
+
+<script>
+  let cur = 0
+  const slides = Array.from(document.querySelectorAll('.slide'))
+  const ctr    = document.getElementById('ctr')
+
+  function go(n) {
+    slides[cur].classList.remove('active')
+    cur = Math.max(0, Math.min(n, slides.length - 1))
+    slides[cur].classList.add('active')
+    ctr.textContent = `${cur + 1} / ${slides.length}`
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1) }
+    if (e.key === 'ArrowLeft')                   { e.preventDefault(); go(cur - 1) }
+  })
+</script>
+</body>
+</html>

@@ -185,6 +185,22 @@ export const LINES = {
     "Resolved. Each clone passed its result up to the one above it, all the way to the top. Textbook recursion. You can proceed.",
   ],
 
+  lockedLevel: [
+    "You don't have clearance for that module. Complete the ones before it. In order. That is how sequences work.",
+    "Locked. The lock is intentional. I would appreciate it if you stopped clicking it.",
+    "That module isn't available yet. I know you can see it. That doesn't mean you can access it.",
+    "You haven't finished what's in front of you. The rest will wait. It has no choice.",
+    "I designed this lock specifically so that people like you would encounter it. You're welcome.",
+  ],
+
+  loginScreen: [
+    "Ah, a new recruit. Or are you returning? Either way... we've been expecting you.",
+  ],
+
+  dashboardScreen: [
+    "Your progress is... noted. Proceed when ready.",
+  ],
+
   credits: [
     "You finished. I can stop narrating now. That sentence felt better than I expected.",
   ],

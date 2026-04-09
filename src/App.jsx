@@ -1,11 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import TitleScreen    from './components/TitleScreen.jsx'
-import LevelScreen    from './components/LevelScreen.jsx'
-import StackOverflow  from './components/StackOverflow.jsx'
-import NarratorBox    from './components/NarratorBox.jsx'
-import OnboardingQuiz from './components/OnboardingQuiz.jsx'
-import ConceptScreen  from './components/ConceptScreen.jsx'
-import CreditsScreen  from './components/CreditsScreen.jsx'
+import TitleScreen     from './components/TitleScreen.jsx'
+import LevelScreen     from './components/LevelScreen.jsx'
+import StackOverflow   from './components/StackOverflow.jsx'
+import NarratorBox     from './components/NarratorBox.jsx'
+import OnboardingQuiz  from './components/OnboardingQuiz.jsx'
+import ConceptScreen   from './components/ConceptScreen.jsx'
+import CreditsScreen   from './components/CreditsScreen.jsx'
+import LoginScreen     from './components/LoginScreen.jsx'
+import DashboardScreen from './components/DashboardScreen.jsx'
 import { level1 }     from './levels/level1.js'
 import { level2 }     from './levels/level2.js'
 import { getLine, getExpression, speak, stopAudio, LINES } from './systems/narratorSystem.js'
@@ -24,13 +26,17 @@ const INITIAL_NARRATOR = {
 }
 
 export default function App() {
-  const [screen,         setScreen]         = useState('quiz')
+  const [screen,         setScreen]         = useState('login')
   const [levelIndex,     setLevelIndex]      = useState(0)
   const [isMuted,        setIsMuted]         = useState(false)
   const [narratorState,  setNarratorState]   = useState(INITIAL_NARRATOR)
   const [lineTracker,    setLineTracker]      = useState({})
-  const [narratorLine,   setNarratorLine]    = useState(null)
-const [transitioning,        setTransitioning]        = useState(false)
+  const [narratorLine,    setNarratorLine]   = useState(null)
+  const [completedLevels, setCompletedLevels] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cp192_progress') || '[]') }
+    catch { return [] }
+  })
+  const [transitioning,        setTransitioning]        = useState(false)
   const [conceptExpression,    setConceptExpression]    = useState(null)
   const [overflowReturnPhase,  setOverflowReturnPhase]  = useState('guided')
 
@@ -61,11 +67,13 @@ const [transitioning,        setTransitioning]        = useState(false)
   // ── Screen → music ────────────────────────────────────────────────────────────
   useEffect(() => {
     const MAP = {
-      quiz:     'title',
-      concept:  'title',
-      title:    'title',
-      level:    'level',
-      overflow: 'overflow',
+      quiz:      'title',
+      concept:   'title',
+      title:     'title',
+      login:     'title',
+      dashboard: 'title',
+      level:     'level',
+      overflow:  'overflow',
     }
     const key = MAP[screen]
     if (key) playTrack(key)
@@ -126,7 +134,7 @@ const [transitioning,        setTransitioning]        = useState(false)
     navigateTo('title')
   }
 
-  // ── Title → Level 1 ───────────────────────────────────────────────────────────
+  // ── Title → Login ─────────────────────────────────────────────────────────────
   async function handleStart() {
     if (startingRef.current) return
     startingRef.current = true
@@ -136,6 +144,49 @@ const [transitioning,        setTransitioning]        = useState(false)
     playNarratorClick(isMuted)
     await speak(text, isMuted)
     navigateTo('level')
+  }
+
+  // ── Login: Log In button ──────────────────────────────────────────────────────
+  function handleLoginSubmit(email) {
+    const saved = localStorage.getItem('cp192_progress')
+    const progress = saved ? JSON.parse(saved) : []
+    setCompletedLevels(progress)
+    setNarratorLine(LINES.dashboardScreen[0])
+    navigateTo('dashboard')
+  }
+
+  // ── Login: Sign Up button → save user + start orientation ────────────────────
+  function handleSignUpSubmit(name, email) {
+    localStorage.setItem('cp192_user', JSON.stringify({ name, email }))
+    localStorage.setItem('cp192_progress', '[]')
+    setCompletedLevels([])
+    navigateTo('quiz')
+  }
+
+  // ── Login: Continue as Guest → orientation, no save ──────────────────────────
+  function handleGuestContinue() {
+    setCompletedLevels([])
+    navigateTo('quiz')
+  }
+
+  // ── Dashboard "ENTER FACILITY" → full orientation ────────────────────────────
+  function handleDashboardContinue() {
+    navigateTo('quiz')
+  }
+
+  // ── Dashboard level card click → jump to that level ──────────────────────────
+  function handleDashboardLevelSelect(idx) {
+    setLevelIndex(idx)
+    setNarratorState(prev => ({ ...prev, attemptCount: 0 }))
+    setOverflowReturnPhase('guided')
+    navigateTo('level')
+  }
+
+  // ── Dashboard locked level click → funny narrator line ───────────────────────
+  function handleLockedLevel() {
+    const { text, nextTracker } = getLine('lockedLevel', narratorState, lineTracker)
+    setNarratorLine(text)
+    setLineTracker(nextTracker)
   }
 
   // ── In-level callbacks ────────────────────────────────────────────────────────
@@ -150,6 +201,12 @@ const [transitioning,        setTransitioning]        = useState(false)
   }
 
   function handleLevelComplete(data) {
+    setCompletedLevels(prev => {
+      if (prev.includes(levelIndex)) return prev
+      const updated = [...prev, levelIndex]
+      localStorage.setItem('cp192_progress', JSON.stringify(updated))
+      return updated
+    })
     const wasFirst = narratorState.attemptCount === 0
     if (currentLevel.id === 1 && wasFirst) {
       setNarratorState(prev => ({ ...prev, level1Perfect: true }))
@@ -211,6 +268,23 @@ const [transitioning,        setTransitioning]        = useState(false)
 
       {screen === 'title' && (
         <TitleScreen onStart={handleStart} />
+      )}
+
+      {screen === 'login' && (
+        <LoginScreen
+          onLogin={handleLoginSubmit}
+          onSignUp={handleSignUpSubmit}
+          onGuest={handleGuestContinue}
+        />
+      )}
+
+      {screen === 'dashboard' && (
+        <DashboardScreen
+          completedLevels={completedLevels}
+          onContinue={handleDashboardContinue}
+          onLevelSelect={handleDashboardLevelSelect}
+          onLockedLevel={handleLockedLevel}
+        />
       )}
 
       {screen === 'level' && (

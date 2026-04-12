@@ -1,33 +1,29 @@
 // ═══════════════════════════════════════════════════════════════════════════
 //  codeExecutor.js
 //
-//  Executes user-written Python code via Skulpt (loaded via CDN in index.html).
-//  Returns animation steps + outcome, same interface as before — but async.
-//
-//  The user writes only the function body (indented). We wrap it in:
-//    def functionName(paramName):
-//      <userCode>
-//  then redefine the function with a tracking wrapper before calling it.
+//  Executes user-written Python code via Pyodide (real CPython in the browser).
+//  Returns animation steps + outcome — same interface as before.
 // ═══════════════════════════════════════════════════════════════════════════
 
 const MAX_CALLS = 60
 
-// ── Skulpt helper ─────────────────────────────────────────────────────────────
+// ── Pyodide instance ──────────────────────────────────────────────────────────
 
-function builtinRead(x) {
-  if (
-    window.Sk?.builtinFiles === undefined ||
-    window.Sk.builtinFiles['files'][x] === undefined
-  ) {
-    throw new Error("File not found: '" + x + "'")
-  }
-  return window.Sk.builtinFiles['files'][x]
+let _pyodide = null
+
+export async function initPyodide() {
+  if (_pyodide) return
+  _pyodide = await loadPyodide()
+}
+
+export function isPyodideReady() {
+  return _pyodide !== null
 }
 
 // ── Script builder ────────────────────────────────────────────────────────────
 
 function normalizeIndent(code) {
-  const lines = code.split('\n')
+  const lines    = code.split('\n')
   const nonEmpty = lines.filter(l => l.trim().length > 0)
   if (nonEmpty.length === 0) return code
   const minIndent = Math.min(...nonEmpty.map(l => l.match(/^ */)[0].length))
@@ -36,12 +32,6 @@ function normalizeIndent(code) {
 
 function buildPythonScript(functionName, paramName, initialValue, userCode) {
   userCode = normalizeIndent(userCode)
-  // Note: userCode is the indented function body supplied by the user.
-  // We assemble a full Python module that:
-  //   1. Defines the user's function
-  //   2. Wraps it with call/return tracking
-  //   3. Calls it with initialValue
-  //   4. Prints results as JSON
   return `\
 def __jv(v):
     if v is None: return 'null'
@@ -94,7 +84,7 @@ print(__jv({"steps": __steps, "result": __result, "error": __error}))
 // ── Main executor ─────────────────────────────────────────────────────────────
 
 /**
- * Execute the user's Python function body using Skulpt.
+ * Execute the user's Python function body using Pyodide.
  * @returns {Promise<{ outcome, steps, result, error }>}
  *
  * outcome: 'success' | 'overflow' | 'earlyExit' | 'wrongResult' | 'syntaxError'
@@ -102,34 +92,21 @@ print(__jv({"steps": __steps, "result": __result, "error": __error}))
 export async function executeCode(level, userCode) {
   const { functionName, paramName, initialValue } = level
 
-  if (typeof window.Sk === 'undefined') {
-    return { outcome: 'syntaxError', steps: [], result: null, error: 'Skulpt not loaded' }
+  if (!_pyodide) {
+    return { outcome: 'syntaxError', steps: [], result: null, error: 'Python runtime not loaded' }
   }
 
   const script = buildPythonScript(functionName, paramName, initialValue, userCode)
 
   let output = ''
-
-  window.Sk.configure({
-    output:    (text) => { output += text },
-    read:      builtinRead,
-    execLimit: 8000,   // ms — prevents infinite loops hanging the browser
-  })
+  _pyodide.setStdout({ batched: (text) => { output += text } })
 
   try {
-    await window.Sk.misceval.asyncToPromise(() =>
-      window.Sk.importMainWithBody('<stdin>', false, script, true)
-    )
+    await _pyodide.runPythonAsync(script)
   } catch (err) {
-    // Skulpt wraps Python exceptions; err.tp$name is the Python exception class name
-    const errType = err.tp$name ?? ''
-    const errMsg  = err.args?.v?.[0]?.v ?? err.toString()
+    const errMsg = err.message ?? ''
 
-    const isRecursion = errType === 'RecursionError' ||
-                        errMsg.toLowerCase().includes('recursionerror') ||
-                        errMsg.toLowerCase().includes('maximum recursion')
-
-    if (isRecursion) {
+    if (errMsg.includes('RecursionError') || errMsg.includes('maximum recursion')) {
       return {
         outcome: 'overflow',
         steps:   [{ type: 'overflow', depth: 0 }],
@@ -138,11 +115,14 @@ export async function executeCode(level, userCode) {
       }
     }
 
+    const lines    = errMsg.split('\n').filter(l => l.trim())
+    const lastLine = lines[lines.length - 1] ?? errMsg
+
     return {
       outcome: 'syntaxError',
       steps:   [],
       result:  null,
-      error:   formatPythonError(errType, errMsg),
+      error:   lastLine,
     }
   }
 
@@ -212,7 +192,7 @@ function determineOutcome(level, callCount, result) {
 
 export function isUnrecognizedCode(userCode, functionName) {
   const hasRecursion   = new RegExp(`\\b${functionName}\\s*\\(`).test(userCode)
-  const hasConditional = /\bif\b/.test(userCode)   // Python `if` has no parens
+  const hasConditional = /\bif\b/.test(userCode)
   return hasRecursion && !hasConditional
 }
 

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import LoadingScreen   from './components/LoadingScreen.jsx'
 import TitleScreen     from './components/TitleScreen.jsx'
 import LevelScreen     from './components/LevelScreen.jsx'
 import StackOverflow   from './components/StackOverflow.jsx'
@@ -11,6 +12,7 @@ import DashboardScreen from './components/DashboardScreen.jsx'
 import { level1 }     from './levels/level1.js'
 import { level2 }     from './levels/level2.js'
 import { getLine, getExpression, speak, stopAudio, LINES } from './systems/narratorSystem.js'
+import { initPyodide } from './systems/codeExecutor.js'
 import { initMusic, playTrack, fadeInTrack, setMuted as setMusicMuted, playNarratorClick } from './systems/audioSystem.js'
 import styles from './App.module.css'
 
@@ -36,9 +38,14 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem('cp192_progress') || '[]') }
     catch { return [] }
   })
+  const [pyodideReady,         setPyodideReady]         = useState(false)
   const [transitioning,        setTransitioning]        = useState(false)
   const [conceptExpression,    setConceptExpression]    = useState(null)
   const [overflowReturnPhase,  setOverflowReturnPhase]  = useState('guided')
+
+  useEffect(() => {
+    initPyodide().then(() => setPyodideReady(true))
+  }, [])
 
   const currentLevel      = LEVELS[levelIndex]
   const startingRef       = useRef(false)
@@ -148,6 +155,8 @@ export default function App() {
 
   // ── Login: Log In button ──────────────────────────────────────────────────────
   function handleLoginSubmit(email) {
+    initMusic()
+    playTrack('title')
     const saved = localStorage.getItem('cp192_progress')
     const progress = saved ? JSON.parse(saved) : []
     setCompletedLevels(progress)
@@ -241,6 +250,8 @@ export default function App() {
 
   const expression = getExpression(narratorState)
   const levelKey   = `level-${levelIndex}-${screen}`
+
+  if (!pyodideReady) return <LoadingScreen />
 
   return (
     <div className={styles.app}>

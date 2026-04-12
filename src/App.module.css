@@ -6,12 +6,32 @@
   background: var(--bg);
 }
 
-/* ── Top-right mute button ── */
+/* ── Top-right controls ── */
+
+.topControls {
+  position: fixed;
+  top: 14px; right: 16px;
+  z-index: 200;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.signOutBtn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 14px; height: 38px;
+  font-family: var(--font); font-size: 9px;
+  font-weight: 700; letter-spacing: 2px;
+  color: var(--text-dim); cursor: pointer;
+  transition: all 0.15s;
+}
+
+.signOutBtn:hover { border-color: var(--red); color: var(--red); }
 
 .muteCorner {
-  position: fixed;
-  top: 14px;
-  right: 16px;
+  position: relative;
+  top: unset;
+  right: unset;
   z-index: 200;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -33,6 +53,56 @@
   color: var(--text);
   background: var(--accent-bg);
 }
+
+/* ── Sign out modal ── */
+
+.modalOverlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500;
+}
+
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 28px 32px;
+  max-width: 340px; width: 90%;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.modalTitle {
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 3px; color: var(--text);
+}
+
+.modalBody {
+  font-size: 11px; color: var(--text-dim);
+  line-height: 1.5; letter-spacing: 0.5px;
+}
+
+.modalActions { display: flex; gap: 10px; margin-top: 4px; }
+
+.modalCancel {
+  flex: 1; padding: 10px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 3px; font-family: var(--font);
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  color: var(--text-dim); cursor: pointer; transition: all 0.15s;
+}
+
+.modalCancel:hover { border-color: var(--text); color: var(--text); }
+
+.modalConfirm {
+  flex: 1; padding: 10px;
+  background: var(--red); border: none;
+  border-radius: 3px; font-family: var(--font);
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  color: #fff; cursor: pointer; transition: opacity 0.15s;
+}
+
+.modalConfirm:hover { opacity: 0.85; }
 
 /* ── Screen crossfade overlay ── */
 

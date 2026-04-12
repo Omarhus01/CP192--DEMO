@@ -67,7 +67,7 @@ function reducer(state, action) {
 
 export default function LevelScreen({
   level, initialPhase = 'guided', hasNextLevel = false, narratorState, lineTracker, isMuted,
-  onNarratorLine, onOverflow, onLevelComplete, onWrongAttempt,
+  onNarratorLine, onOverflow, onLevelComplete, onWrongAttempt, onCheckpoint, onDashboard,
 }) {
   const [state, dispatch] = useReducer(reducer, initialPhase, (phase) => makeInitial(level, phase))
   const [speed, setSpeed] = useState('slow')
@@ -318,6 +318,7 @@ export default function LevelScreen({
       dispatch({ type: 'NEXT_GUIDED_STEP' })
     } else {
       dispatch({ type: 'SET_LEVEL_PHASE', payload: 'scaffold' })
+      onCheckpoint?.(level.id - 1, 'scaffold')
       if (level.scaffoldIntroLine) {
         setTimeout(() => {
           const mut = isMutedRef.current
@@ -372,6 +373,7 @@ export default function LevelScreen({
     if (s.levelPhase === 'scaffold') {
       const text = level.freePhaseIntro ?? "Good. Now write it yourself."
       fireScaffoldLine(text)
+      onCheckpoint?.(level.id - 1, 'free')
       setTimeout(() => dispatch({ type: 'SCAFFOLD_SUCCESS', level }), 1800)
       return
     }
@@ -478,6 +480,9 @@ export default function LevelScreen({
       {/* ── Header ── */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
+          {onDashboard && (
+            <button className={styles.dashboardBtn} onClick={onDashboard}>← DASHBOARD</button>
+          )}
           <span className={styles.levelTag}>LEVEL {level.id}</span>
           <span className={styles.levelTitle}>{level.title}</span>
         </div>

@@ -1,13 +1,37 @@
 import { useState, useEffect } from 'react'
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from 'firebase/auth'
+import { auth } from '../systems/firebaseConfig.js'
+import { saveUserProfile } from '../systems/firestoreService.js'
 import styles from './LoginScreen.module.css'
 
+const ERROR_MAP = {
+  'auth/user-not-found':      'No account found with this email.',
+  'auth/wrong-password':      'Incorrect password.',
+  'auth/invalid-credential':  'Incorrect email or password.',
+  'auth/email-already-in-use':'An account with this email already exists.',
+  'auth/weak-password':       'Password must be at least 6 characters.',
+  'auth/invalid-email':       'Please enter a valid email address.',
+  'auth/too-many-requests':   'Too many attempts. Please try again later.',
+}
+
+function friendlyError(code) {
+  return ERROR_MAP[code] ?? 'Something went wrong. Please try again.'
+}
+
 export default function LoginScreen({ onLogin, onSignUp, onGuest }) {
-  const [visible,  setVisible]  = useState(false)
-  const [tab,      setTab]      = useState('login')
-  const [name,     setName]     = useState('')
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const [error,    setError]    = useState('')
+  const [visible,      setVisible]      = useState(false)
+  const [tab,          setTab]          = useState('login')
+  const [name,         setName]         = useState('')
+  const [email,        setEmail]        = useState('')
+  const [password,     setPassword]     = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error,        setError]        = useState('')
+  const [loading,      setLoading]      = useState(false)
+  const [resetSent,    setResetSent]    = useState(false)
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 100)
@@ -17,25 +41,51 @@ export default function LoginScreen({ onLogin, onSignUp, onGuest }) {
   function switchTab(t) {
     setTab(t)
     setError('')
+    setResetSent(false)
   }
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault()
-    const saved = localStorage.getItem('cp192_user')
-    if (!saved) {
-      setError('No account found. Please sign up first.')
-      return
+    setError('')
+    setLoading(true)
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password)
+      onLogin(cred.user)
+    } catch (err) {
+      setError(friendlyError(err.code))
+    } finally {
+      setLoading(false)
     }
-    onLogin(email)
   }
 
-  function handleSignUp(e) {
+  async function handleSignUp(e) {
     e.preventDefault()
-    if (!name.trim() || !email.trim()) {
-      setError('Please fill in all fields.')
-      return
+    setError('')
+    if (!name.trim()) { setError('Please enter your name.'); return }
+    setLoading(true)
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password)
+      await saveUserProfile(cred.user.uid, name.trim(), email, [], {})
+      onSignUp(cred.user, name.trim(), email, null)
+    } catch (err) {
+      setError(friendlyError(err.code))
+    } finally {
+      setLoading(false)
     }
-    onSignUp(name.trim(), email.trim())
+  }
+
+  async function handleForgotPassword() {
+    if (!email.trim()) { setError('Enter your email above first.'); return }
+    setError('')
+    setLoading(true)
+    try {
+      await sendPasswordResetEmail(auth, email)
+      setResetSent(true)
+    } catch (err) {
+      setError(friendlyError(err.code))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -72,18 +122,35 @@ export default function LoginScreen({ onLogin, onSignUp, onGuest }) {
                 placeholder="recruit@facility.gov"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                required
               />
               <label className={styles.label}>PASSWORD</label>
-              <input
-                className={styles.input}
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
+              <div className={styles.passwordRow}>
+                <input
+                  className={styles.input}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.eyeBtn}
+                  onClick={() => setShowPassword(v => !v)}
+                >{showPassword ? '🙈' : '👁'}</button>
+              </div>
+              {resetSent && <div className={styles.success}>Reset email sent. Check your inbox.</div>}
               {error && <div className={styles.error}>{error}</div>}
-              <button className={styles.submitBtn} type="submit">LOG IN</button>
-              <button className={styles.forgotLink} type="button">Forgot password?</button>
+              <button className={styles.submitBtn} type="submit" disabled={loading}>
+                {loading ? 'LOGGING IN…' : 'LOG IN'}
+              </button>
+              <button
+                className={styles.forgotLink}
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={loading}
+              >Forgot password?</button>
             </form>
           )}
 
@@ -96,6 +163,7 @@ export default function LoginScreen({ onLogin, onSignUp, onGuest }) {
                 placeholder="Full name"
                 value={name}
                 onChange={e => setName(e.target.value)}
+                required
               />
               <label className={styles.label}>EMAIL</label>
               <input
@@ -104,22 +172,33 @@ export default function LoginScreen({ onLogin, onSignUp, onGuest }) {
                 placeholder="recruit@facility.gov"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                required
               />
               <label className={styles.label}>PASSWORD</label>
-              <input
-                className={styles.input}
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
+              <div className={styles.passwordRow}>
+                <input
+                  className={styles.input}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="min. 6 characters"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.eyeBtn}
+                  onClick={() => setShowPassword(v => !v)}
+                >{showPassword ? '🙈' : '👁'}</button>
+              </div>
               {error && <div className={styles.error}>{error}</div>}
-              <button className={styles.submitBtn} type="submit">CREATE ACCOUNT</button>
+              <button className={styles.submitBtn} type="submit" disabled={loading}>
+                {loading ? 'CREATING…' : 'CREATE ACCOUNT'}
+              </button>
             </form>
           )}
         </div>
 
-        <button className={styles.guestBtn} onClick={onGuest}>
+        <button className={styles.guestBtn} onClick={onGuest} disabled={loading}>
           CONTINUE AS GUEST
         </button>
 

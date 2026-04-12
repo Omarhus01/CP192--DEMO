@@ -12,7 +12,7 @@ const LEVELS_DATA = [
   { id: 8, name: 'FINAL ASSESSMENT', topic: 'Full Application'         },
 ]
 
-const ACTUAL_LEVELS = 2 // levels that actually exist in the game
+const ACTUAL_LEVELS = 2
 
 function getStatus(levelIdx, completedLevels) {
   if (completedLevels.includes(levelIdx)) return 'complete'
@@ -20,9 +20,17 @@ function getStatus(levelIdx, completedLevels) {
   return 'locked'
 }
 
+function getPhaseProgress(levelIdx, completedLevels, checkpoints) {
+  if (completedLevels.includes(levelIdx)) return 3
+  const cp = checkpoints[String(levelIdx)]
+  if (cp === 'free')     return 2
+  if (cp === 'scaffold') return 1
+  return 0
+}
+
 const TOTAL = LEVELS_DATA.length
 
-export default function DashboardScreen({ completedLevels = [], onContinue, onLevelSelect, onLockedLevel }) {
+export default function DashboardScreen({ completedLevels = [], checkpoints = {}, onContinue, onLevelSelect, onLockedLevel }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -60,8 +68,11 @@ export default function DashboardScreen({ completedLevels = [], onContinue, onLe
 
         <div className={styles.grid}>
           {LEVELS_DATA.map(level => {
-            const idx    = level.id - 1
-            const status = getStatus(idx, completedLevels)
+            const idx      = level.id - 1
+            const status   = getStatus(idx, completedLevels)
+            const phases   = getPhaseProgress(idx, completedLevels, checkpoints)
+            const phasePct = Math.round(phases / 3 * 100)
+            const inProgress = status === 'active' && phases > 0
             return (
               <div
                 key={level.id}
@@ -76,9 +87,15 @@ export default function DashboardScreen({ completedLevels = [], onContinue, onLe
                 <div className={styles.cardTopic}>{level.topic}</div>
                 <div className={styles.cardStatus}>
                   {status === 'complete' && <span className={styles.badge}>✓ COMPLETE</span>}
-                  {status === 'active'   && <span className={styles.badgeActive}>▶ START</span>}
-                  {status === 'locked'   && <span className={styles.lockIcon}>⬛</span>}
+                  {status === 'active' && !inProgress && <span className={styles.badgeActive}>▶ START</span>}
+                  {status === 'locked'  && <span className={styles.lockIcon}>⬛</span>}
                 </div>
+                {inProgress && (
+                  <div className={styles.phaseBar}>
+                    <div className={styles.phaseBarFill} style={{ width: `${phasePct}%` }} />
+                    <span className={styles.phaseLabel}>{phases}/3 PHASES — {phasePct}%</span>
+                  </div>
+                )}
               </div>
             )
           })}
@@ -92,6 +109,7 @@ export default function DashboardScreen({ completedLevels = [], onContinue, onLe
           CLEARANCE LEVEL: ORIENTATION &nbsp;|&nbsp; ALL CLONES SUPERVISED
         </div>
       </div>
+
     </div>
   )
 }

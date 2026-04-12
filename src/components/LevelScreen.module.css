@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 20px;
-  padding-right: 62px; /* reserve space for fixed mute button */
+  padding-right: 160px; /* reserve space for sign out + mute buttons */
   border-bottom: 2px solid var(--border);
   flex-shrink: 0;
   background: var(--bg-secondary);
@@ -26,6 +26,25 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.dashboardBtn {
+  font-family: var(--font);
+  font-size: 8px;
+  letter-spacing: 2px;
+  padding: 4px 10px;
+  border-radius: 2px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+
+.dashboardBtn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
 }
 
 .levelTag {

@@ -148,3 +148,33 @@
 }
 
 .footer { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); opacity: 0.5; }
+
+/* ── Password row ─────────────────────────────────────── */
+
+.passwordRow {
+  display: flex; align-items: center; gap: 6px;
+}
+
+.passwordRow .input { flex: 1; }
+
+.eyeBtn {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 3px; padding: 8px 10px;
+  font-size: 14px; cursor: pointer; line-height: 1;
+  transition: border-color 0.15s;
+}
+
+.eyeBtn:hover { border-color: var(--blue); }
+
+/* ── Submit disabled ──────────────────────────────────── */
+
+.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* ── Success message ──────────────────────────────────── */
+
+.success {
+  font-size: 10px; color: var(--green-dim);
+  background: var(--green-dark); border: 1px solid var(--green);
+  border-radius: 3px; padding: 6px 10px;
+  letter-spacing: 0.5px;
+}

@@ -13,6 +13,9 @@ import { level1 }     from './levels/level1.js'
 import { level2 }     from './levels/level2.js'
 import { getLine, getExpression, speak, stopAudio, LINES } from './systems/narratorSystem.js'
 import { initPyodide } from './systems/codeExecutor.js'
+import { auth } from './systems/firebaseConfig.js'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { loadUserData, saveProgress, saveCheckpoint } from './systems/firestoreService.js'
 import { initMusic, playTrack, fadeInTrack, setMuted as setMusicMuted, playNarratorClick } from './systems/audioSystem.js'
 import styles from './App.module.css'
 
@@ -38,7 +41,11 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem('cp192_progress') || '[]') }
     catch { return [] }
   })
+  const [checkpoints,          setCheckpoints]          = useState({})
   const [pyodideReady,         setPyodideReady]         = useState(false)
+  const [authChecked,          setAuthChecked]          = useState(false)
+  const [currentUser,          setCurrentUser]          = useState(null)
+  const [showSignOutModal,     setShowSignOutModal]     = useState(false)
   const [transitioning,        setTransitioning]        = useState(false)
   const [conceptExpression,    setConceptExpression]    = useState(null)
   const [overflowReturnPhase,  setOverflowReturnPhase]  = useState('guided')
@@ -46,6 +53,24 @@ export default function App() {
   useEffect(() => {
     initPyodide().then(() => setPyodideReady(true))
   }, [])
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setCurrentUser(user)
+        const data = await loadUserData(user.uid)
+        setCompletedLevels(data.progress)
+        setCheckpoints(data.checkpoints ?? {})
+        setAuthChecked(true)
+        setNarratorLine(LINES.dashboardScreen[0])
+        setScreen('dashboard')
+      } else {
+        setCurrentUser(null)
+        setAuthChecked(true)
+      }
+    })
+    return () => unsub()
+  }, []) // eslint-disable-line
 
   const currentLevel      = LEVELS[levelIndex]
   const startingRef       = useRef(false)
@@ -154,21 +179,24 @@ export default function App() {
   }
 
   // ── Login: Log In button ──────────────────────────────────────────────────────
-  function handleLoginSubmit(email) {
+  async function handleLoginSubmit(user) {
     initMusic()
     playTrack('title')
-    const saved = localStorage.getItem('cp192_progress')
-    const progress = saved ? JSON.parse(saved) : []
-    setCompletedLevels(progress)
+    setCurrentUser(user)
+    const data = await loadUserData(user.uid)
+    setCompletedLevels(data.progress)
+    setCheckpoints(data.checkpoints ?? {})
     setNarratorLine(LINES.dashboardScreen[0])
     navigateTo('dashboard')
   }
 
   // ── Login: Sign Up button → save user + start orientation ────────────────────
-  function handleSignUpSubmit(name, email) {
-    localStorage.setItem('cp192_user', JSON.stringify({ name, email }))
-    localStorage.setItem('cp192_progress', '[]')
-    setCompletedLevels([])
+  function handleSignUpSubmit(user, name, email, migratedProgress) {
+    initMusic()
+    playTrack('title')
+    setCurrentUser(user)
+    setCompletedLevels(migratedProgress ?? [])
+    localStorage.removeItem('cp192_progress')
     navigateTo('quiz')
   }
 
@@ -187,7 +215,8 @@ export default function App() {
   function handleDashboardLevelSelect(idx) {
     setLevelIndex(idx)
     setNarratorState(prev => ({ ...prev, attemptCount: 0 }))
-    setOverflowReturnPhase('guided')
+    const savedPhase = checkpoints[String(idx)] ?? 'guided'
+    setOverflowReturnPhase(savedPhase)
     navigateTo('level')
   }
 
@@ -209,11 +238,32 @@ export default function App() {
     navigateTo('overflow')
   }
 
+  function handleCheckpoint(levelIdx, phase) {
+    setCheckpoints(prev => ({ ...prev, [String(levelIdx)]: phase }))
+    if (currentUser) saveCheckpoint(currentUser.uid, levelIdx, phase)
+  }
+
+  function handleSignOut() {
+    setShowSignOutModal(true)
+  }
+
+  async function confirmSignOut() {
+    setShowSignOutModal(false)
+    await signOut(auth)
+    setCurrentUser(null)
+    setCompletedLevels([])
+    setCheckpoints({})
+    setNarratorState(INITIAL_NARRATOR)
+    setLevelIndex(0)
+    navigateTo('login')
+  }
+
   function handleLevelComplete(data) {
     setCompletedLevels(prev => {
       if (prev.includes(levelIndex)) return prev
       const updated = [...prev, levelIndex]
       localStorage.setItem('cp192_progress', JSON.stringify(updated))
+      if (currentUser) saveProgress(currentUser.uid, updated)
       return updated
     })
     const wasFirst = narratorState.attemptCount === 0
@@ -251,18 +301,25 @@ export default function App() {
   const expression = getExpression(narratorState)
   const levelKey   = `level-${levelIndex}-${screen}`
 
-  if (!pyodideReady) return <LoadingScreen />
+  if (!pyodideReady || !authChecked) return <LoadingScreen />
 
   return (
     <div className={styles.app}>
-      {/* ── Mute toggle ── */}
-      <button
-        className={styles.muteCorner}
-        onClick={() => setIsMuted(m => !m)}
-        title={isMuted ? 'Unmute' : 'Mute'}
-      >
-        {isMuted ? '🔇' : '🔊'}
-      </button>
+      {/* ── Top-right controls ── */}
+      <div className={styles.topControls}>
+        {currentUser && screen !== 'login' && (
+          <button className={styles.signOutBtn} onClick={handleSignOut}>
+            SIGN OUT
+          </button>
+        )}
+        <button
+          className={styles.muteCorner}
+          onClick={() => setIsMuted(m => !m)}
+          title={isMuted ? 'Unmute' : 'Mute'}
+        >
+          {isMuted ? '🔇' : '🔊'}
+        </button>
+      </div>
 
       {screen === 'quiz' && (
         <OnboardingQuiz onAnswer={handleQuizAnswer} />
@@ -292,9 +349,11 @@ export default function App() {
       {screen === 'dashboard' && (
         <DashboardScreen
           completedLevels={completedLevels}
+          checkpoints={checkpoints}
           onContinue={handleDashboardContinue}
           onLevelSelect={handleDashboardLevelSelect}
           onLockedLevel={handleLockedLevel}
+          onSignOut={handleSignOut}
         />
       )}
 
@@ -311,6 +370,8 @@ export default function App() {
           onOverflow={handleOverflow}
           onLevelComplete={handleLevelComplete}
           onWrongAttempt={handleWrongAttempt}
+          onCheckpoint={handleCheckpoint}
+          onDashboard={() => navigateTo('dashboard')}
         />
       )}
 
@@ -324,6 +385,19 @@ export default function App() {
 
       {/* ── Crossfade overlay for screen transitions ── */}
       {transitioning && <div className={styles.fadeOverlay} />}
+
+      {showSignOutModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalTitle}>SIGN OUT?</div>
+            <div className={styles.modalBody}>Your progress is saved. You can log back in anytime.</div>
+            <div className={styles.modalActions}>
+              <button className={styles.modalCancel} onClick={() => setShowSignOutModal(false)}>CANCEL</button>
+              <button className={styles.modalConfirm} onClick={confirmSignOut}>SIGN OUT</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Narrator bar — everywhere except overflow and credits (credits has its own) */}
       {screen !== 'overflow' && screen !== 'credits' && (

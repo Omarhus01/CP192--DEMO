@@ -4,7 +4,9 @@
   left: 0;
   right: 0;
   height: 110px;
-  background: var(--bg-dark);
+  background: rgba(10, 8, 28, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 2px solid var(--accent);
   display: flex;
   align-items: center;

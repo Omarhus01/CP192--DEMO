@@ -39,42 +39,47 @@ export default function Character({ state = 'idle', depth = 0, facing = 'right' 
         {/* ── Left leg ── */}
         <g className={styles.legL}>
           <rect x="11" y="46" width="7" height="16" rx="3" className={styles.pants} />
-          <rect x="10" y="59" width="9" height="6" rx="2" className={styles.shoe} />
+          <rect x="9"  y="58" width="10" height="7" rx="2" className={styles.shoe} />
         </g>
 
         {/* ── Right leg ── */}
         <g className={styles.legR}>
           <rect x="22" y="46" width="7" height="16" rx="3" className={styles.pants} />
-          <rect x="21" y="59" width="9" height="6" rx="2" className={styles.shoe} />
+          <rect x="20" y="58" width="10" height="7" rx="2" className={styles.shoe} />
         </g>
 
-        {/* ── Torso ── */}
+        {/* ── Torso (lab coat) ── */}
         <rect x="10" y="24" width="20" height="24" rx="4" className={styles.torso} />
+        <rect x="15" y="26" width="10" height="20" rx="2" className={styles.shirt} />
+        <rect x="12" y="28" width="4"  height="3"  rx="1" className={styles.pocket} />
 
         {/* ── Left arm ── */}
         <g className={styles.armL}>
-          <rect x="3" y="24" width="7" height="16" rx="3" className={styles.sleeve} />
-          <rect x="2" y="37" width="8" height="5" rx="2" className={styles.hand} />
+          <rect x="3" y="24" width="7" height="18" rx="3" className={styles.sleeve} />
+          <rect x="2" y="39" width="8" height="5"  rx="2" className={styles.hand} />
         </g>
 
         {/* ── Right arm ── */}
         <g className={styles.armR}>
-          <rect x="30" y="24" width="7" height="16" rx="3" className={styles.sleeve} />
-          <rect x="30" y="37" width="8" height="5" rx="2" className={styles.hand} />
+          <rect x="30" y="24" width="7" height="18" rx="3" className={styles.sleeve} />
+          <rect x="30" y="39" width="8" height="5"  rx="2" className={styles.hand} />
         </g>
 
         {/* ── Head ── */}
         <g className={styles.head}>
           {/* Head base */}
-          <rect x="8" y="4" width="24" height="22" rx="7" className={styles.skin} />
+          <rect x="7" y="4" width="26" height="22" rx="9" className={styles.skin} />
+
+          {/* Hair */}
+          <rect x="7" y="4" width="26" height="9" rx="7" className={styles.hair} />
 
           {/* Eyes */}
-          <ellipse cx="15" cy="13" rx="3" ry="3.5" className={styles.eyeWhite} />
-          <ellipse cx="25" cy="13" rx="3" ry="3.5" className={styles.eyeWhite} />
-          <circle  cx="15.8" cy="13.5" r="2" className={styles.pupil} />
-          <circle  cx="25.8" cy="13.5" r="2" className={styles.pupil} />
-          <circle  cx="16.4" cy="12.8" r="0.7" fill="white" />
-          <circle  cx="26.4" cy="12.8" r="0.7" fill="white" />
+          <ellipse cx="15" cy="14" rx="3" ry="3.5" className={styles.eyeWhite} />
+          <ellipse cx="25" cy="14" rx="3" ry="3.5" className={styles.eyeWhite} />
+          <circle  cx="15.8" cy="14.5" r="2"   className={styles.pupil} />
+          <circle  cx="25.8" cy="14.5" r="2"   className={styles.pupil} />
+          <circle  cx="16.4" cy="13.8" r="0.7" fill="white" />
+          <circle  cx="26.4" cy="13.8" r="0.7" fill="white" />
 
           {/* Mouth — changes per state */}
           <path

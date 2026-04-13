@@ -17,12 +17,15 @@
 
 /* ── Colours ── */
 
-.skin    { fill: #fcd5a0; }
-.torso   { fill: #e4e9f4; stroke: #c8d0e4; stroke-width: 0.5; }
-.sleeve  { fill: #e4e9f4; stroke: #c8d0e4; stroke-width: 0.5; }
+.skin    { fill: #f5c08a; }
+.hair    { fill: #2d1a0a; }
+.torso   { fill: #1d4ed8; stroke: #1e40af; stroke-width: 0.5; }
+.shirt   { fill: #f0f4ff; opacity: 0.92; }
+.pocket  { fill: none; stroke: rgba(255,255,255,0.35); stroke-width: 0.8; }
+.sleeve  { fill: #1d4ed8; stroke: #1e40af; stroke-width: 0.5; }
 .pants   { fill: #2563eb; }
-.shoe    { fill: #1e3a8a; }
-.hand    { fill: #fcd5a0; }
+.shoe    { fill: #0f172a; }
+.hand    { fill: #f5c08a; }
 .eyeWhite{ fill: white; }
 .pupil   { fill: #1e1e3f; }
 .shadow  { fill: rgba(0,0,0,0.12); }

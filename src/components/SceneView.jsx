@@ -3,6 +3,45 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Character from './Character.jsx'
 import styles from './SceneView.module.css'
 
+// ── Ambient floating code symbols ─────────────────────────────────────────────
+
+const PARTICLES = [
+  { sym: '{}', left: '8%',  top: '15%', dur: 5.5 },
+  { sym: '()', left: '23%', top: '62%', dur: 4.2 },
+  { sym: '=>', left: '35%', top: '28%', dur: 6.8 },
+  { sym: '//', left: '54%', top: '70%', dur: 4.8 },
+  { sym: '∞',  left: '66%', top: '20%', dur: 7.1 },
+  { sym: 'λ',  left: '78%', top: '52%', dur: 5.2 },
+  { sym: '↩',  left: '88%', top: '38%', dur: 6.0 },
+  { sym: '0',  left: '14%', top: '80%', dur: 4.5 },
+]
+
+function AmbientParticles() {
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+      {PARTICLES.map((p, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 0.09, y: 15 }}
+          transition={{ duration: p.dur, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+          style={{
+            position: 'absolute',
+            left: p.left,
+            top: p.top,
+            fontFamily: 'Space Mono, monospace',
+            fontSize: '11px',
+            color: '#7dd3fc',
+            userSelect: 'none',
+          }}
+        >
+          {p.sym}
+        </motion.span>
+      ))}
+    </div>
+  )
+}
+
 // ── Level 1 scene — The Floors (Building) ─────────────────────────────────────
 
 function Level1Scene({ clones, characterAtEnd, level }) {
@@ -67,6 +106,7 @@ function Level1Scene({ clones, characterAtEnd, level }) {
       <div className={styles.bgSky} />
       <div className={styles.bgMid} />
       <div className={styles.groundBar} />
+      <AmbientParticles />
 
       {/* ── Building ── */}
       <div className={styles.building}>
@@ -177,6 +217,7 @@ function Level2Scene({ clones, characterAtEnd, level }) {
     <div className={styles.scene}>
       <div className={styles.bgSky} />
       <div className={styles.bgMid} />
+      <AmbientParticles />
 
       {/* ── Left platform — character + clones ── */}
       <div className={styles.platformLeft}>

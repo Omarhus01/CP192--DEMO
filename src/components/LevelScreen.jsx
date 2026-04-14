@@ -70,9 +70,11 @@ export default function LevelScreen({
   onNarratorLine, onOverflow, onLevelComplete, onWrongAttempt, onCheckpoint, onDashboard,
 }) {
   const [state, dispatch] = useReducer(reducer, initialPhase, (phase) => makeInitial(level, phase))
-  const [speed, setSpeed] = useState('slow')
+  const [speed, setSpeed] = useState(level.id === 3 ? 'normal' : 'slow')
   const [successOverlay, setSuccessOverlay] = useState(false)
   const [showNextBtn,    setShowNextBtn]    = useState(false)
+  const [simOutcome,     setSimOutcome]     = useState(null)
+  const [simResult,      setSimResult]      = useState(null)
   const pendingCompletionRef = useRef(null)
 
   const animTimerRef      = useRef(null)
@@ -217,6 +219,7 @@ export default function LevelScreen({
 
       case 'overflow':
         dispatch({ type: 'SET_PHASE', payload: 'done' })
+        setSimOutcome('overflow')
         playOverflowSound(isMutedRef.current)
         onlySyntaxErrorsRef.current = false
         noBaseCaseCountRef.current++
@@ -231,6 +234,8 @@ export default function LevelScreen({
       case 'complete': {
         const outcome = simResultRef.current?.outcome
         dispatch({ type: 'SET_PHASE', payload: 'done' })
+        setSimOutcome(outcome)
+        setSimResult(simResultRef.current?.result ?? null)
         if (outcome === 'success') {
           playSuccessSound(isMutedRef.current)
           // Character only moves after all clones have resolved and disappeared
@@ -254,6 +259,8 @@ export default function LevelScreen({
   async function handleRun() {
     if (isRunningRef.current) return
     resetIdle()
+    setSimOutcome(null)
+    setSimResult(null)
 
     const code = stateRef.current.userCode?.trim() ?? ''
     if (!code || code === (level.starterCode ?? '').trim()) {
@@ -298,6 +305,8 @@ export default function LevelScreen({
     const newCount = stateRef.current.resetCount + 1
     dispatch({ type: 'RESET', level })
     simResultRef.current = null
+    setSimOutcome(null)
+    setSimResult(null)
     if (newCount >= 3) {
       fireNarrator('resetTooMany')
       const scene = document.getElementById('puzzle-scene')
@@ -340,6 +349,8 @@ export default function LevelScreen({
   async function handleScaffoldRun(filledCode) {
     if (isRunningRef.current) return
     resetIdle()
+    setSimOutcome(null)
+    setSimResult(null)
     isRunningRef.current = true
     dispatch({ type: 'SET_PHASE', payload: 'running' })
 
@@ -417,6 +428,8 @@ export default function LevelScreen({
     setTimeout(() => {
       const explanationLine = level.id === 1
         ? "There it is. The base case fired — climb(1) returned True. Now watch: every clone that was waiting gets to return, one by one, all the way back to climb(5). That's the return chain."
+        : level.id === 3
+        ? "Both branches resolved. fib(4) and fib(3) each waited for their own sub-branches — all the way down to fib(1) and fib(0). Then the answers travelled back up and combined. That is branching recursion."
         : "Each clone added 1 to what the clone below it returned. count(0) said zero. count(1) said one. All the way up to count(5), which said five. That is how recursive return values work."
       onNarratorLineRef.current(explanationLine, lineTrackerRef.current)
       playNarratorClick(isMutedRef.current)
@@ -442,7 +455,7 @@ export default function LevelScreen({
     onWrongAttempt?.()
     onlySyntaxErrorsRef.current = false
     dispatch({ type: 'WRONG_STREAK' })
-    const trigger = outcomeToNarratorTrigger(outcome, false)
+    const trigger = outcomeToNarratorTrigger(outcome, false, level.id)
     fireNarrator(trigger)
     const scene = document.getElementById('puzzle-scene')
     if (scene) { scene.classList.add('wrongShake'); setTimeout(() => scene.classList.remove('wrongShake'), 250) }
@@ -457,6 +470,7 @@ export default function LevelScreen({
     if (state.characterAtEnd) {
       if (level.id === 1) return { type: 'text', text: 'chain resolved — all floors climbed' }
       if (level.id === 2) return { type: 'number', value: level.initialValue }
+      if (level.id === 3) return { type: 'text', text: 'fib(5) = 5 — tree resolved' }
     }
     const ret = state.clones.find(c => c.isReturning)
     if (!ret) return null
@@ -516,6 +530,9 @@ export default function LevelScreen({
             level={level}
             clones={state.clones}
             characterAtEnd={state.characterAtEnd}
+            simOutcome={simOutcome}
+            simResult={simResult}
+            resetCount={state.resetCount}
           />
 
           {/* Success overlay — contextual labels + next level button */}

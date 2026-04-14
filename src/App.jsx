@@ -11,6 +11,7 @@ import LoginScreen     from './components/LoginScreen.jsx'
 import DashboardScreen from './components/DashboardScreen.jsx'
 import { level1 }     from './levels/level1.js'
 import { level2 }     from './levels/level2.js'
+import { level3 }     from './levels/level3.js'
 import { getLine, getExpression, speak, stopAudio, LINES } from './systems/narratorSystem.js'
 import { initPyodide } from './systems/codeExecutor.js'
 import { auth } from './systems/firebaseConfig.js'
@@ -19,7 +20,7 @@ import { loadUserData, saveProgress, saveCheckpoint } from './systems/firestoreS
 import { initMusic, playTrack, fadeInTrack, setMuted as setMusicMuted, playNarratorClick } from './systems/audioSystem.js'
 import styles from './App.module.css'
 
-const LEVELS = [level1, level2]
+const LEVELS = [level1, level2, level3]
 
 const INITIAL_NARRATOR = {
   attemptCount:               0,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Character from './Character.jsx'
 import styles from './SceneView.module.css'
@@ -313,11 +313,245 @@ function Level2Scene({ clones, characterAtEnd, level }) {
   )
 }
 
+// ── Level 3: Full fib(5) tree — 15 nodes, 5 rows ─────────────────────────────
+
+const FIB_TREE = [
+  { id: 0,  label: 'fib(5)', value: 5, x: 50, y: 6,  isBase: false },
+  { id: 1,  label: 'fib(4)', value: 3, x: 28, y: 22, isBase: false },
+  { id: 2,  label: 'fib(3)', value: 2, x: 72, y: 22, isBase: false },
+  { id: 3,  label: 'fib(3)', value: 2, x: 14, y: 38, isBase: false },
+  { id: 4,  label: 'fib(2)', value: 1, x: 36, y: 38, isBase: false },
+  { id: 5,  label: 'fib(2)', value: 1, x: 60, y: 38, isBase: false },
+  { id: 6,  label: 'fib(1)', value: 1, x: 82, y: 38, isBase: true  },
+  { id: 7,  label: 'fib(2)', value: 1, x: 11, y: 56, isBase: false },
+  { id: 8,  label: 'fib(1)', value: 1, x: 22, y: 56, isBase: true  },
+  { id: 9,  label: 'fib(1)', value: 1, x: 42, y: 56, isBase: true  },
+  { id: 10, label: 'fib(0)', value: 0, x: 54, y: 56, isBase: true  },
+  { id: 11, label: 'fib(1)', value: 1, x: 66, y: 56, isBase: true  },
+  { id: 12, label: 'fib(0)', value: 0, x: 78, y: 56, isBase: true  },
+  { id: 13, label: 'fib(1)', value: 1, x: 5,  y: 74, isBase: true  },
+  { id: 14, label: 'fib(0)', value: 0, x: 16, y: 74, isBase: true  },
+]
+
+const FIB_EDGES = [
+  [0,1],[0,2],
+  [1,3],[1,4],[2,5],[2,6],
+  [3,7],[3,8],[4,9],[4,10],[5,11],[5,12],
+  [7,13],[7,14],
+]
+
+const CALL_ORDER   = [0,1,3,7,13,14,8,4,9,10,2,5,11,12,6]
+const RETURN_ORDER = [13,14,7,8,3,9,10,4,11,12,5,6,2,1,0]
+const NODE_ROW     = [0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4]
+
+// ── Level 3 scene — The Split (Fibonacci Game) ────────────────────────────────
+
+function Level3Scene({ clones, characterAtEnd, simOutcome, simResult, resetCount }) {
+  const [nodeStatuses, setNodeStatuses] = useState(Array(15).fill('hidden'))
+  const [nodeValues,   setNodeValues]   = useState(Array(15).fill(null))
+  const [calledCount,  setCalledCount]  = useState(0)
+  const [charState,    setCharState]    = useState('idle')
+  const [charX,        setCharX]        = useState(-12)
+  const [rippling,     setRippling]     = useState(false)
+  const [showStars,    setShowStars]    = useState(false)
+  const prevClonesLen = useRef(0)
+  const calledIdx     = useRef(0)
+  const resolvedIdx   = useRef(0)
+  const wrongRef      = useRef(false)
+
+  // Walk in on mount
+  useEffect(() => {
+    const t = setTimeout(() => setCharX(6), 80)
+    return () => clearTimeout(t)
+  }, [])
+
+  // Success: walk + ripple wave + stars
+  useEffect(() => {
+    if (!characterAtEnd) return
+    setCharState('walk')
+    const t1 = setTimeout(() => setCharX(18), 50)
+    const t2 = setTimeout(() => setCharState('idle'), 1300)
+    const t3 = setTimeout(() => setRippling(true), 300)
+    const t4 = setTimeout(() => setShowStars(true), 900)
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4) }
+  }, [characterAtEnd])
+
+  // Wrong result: lock clones processing (scene shows red via simOutcome prop)
+  useEffect(() => {
+    if (simOutcome !== 'wrongResult') return
+    wrongRef.current = true
+  }, [simOutcome])
+
+  // Overflow: glitch all currently active nodes
+  useEffect(() => {
+    if (simOutcome !== 'overflow') return
+    wrongRef.current = true
+    setNodeStatuses(s => s.map(v => v === 'active' ? 'overflow' : v))
+  }, [simOutcome])
+
+  // Reset all visual state when LevelScreen dispatches RESET
+  useEffect(() => {
+    if (resetCount === 0) return
+    setNodeStatuses(Array(15).fill('hidden'))
+    setNodeValues(Array(15).fill(null))
+    setCalledCount(0)
+    setCharState('idle')
+    setCharX(6)
+    setRippling(false)
+    setShowStars(false)
+    prevClonesLen.current = 0
+    calledIdx.current = 0
+    resolvedIdx.current = 0
+    wrongRef.current = false
+  }, [resetCount]) // eslint-disable-line
+
+  // Tree animation: push → activate node, pop → resolve node
+  useEffect(() => {
+    if (wrongRef.current) return
+    const prev = prevClonesLen.current
+    const curr = clones.length
+
+    if (curr > prev) {
+      const nodeIdx = CALL_ORDER[calledIdx.current]
+      if (nodeIdx !== undefined) {
+        setNodeStatuses(s => s.map((v, i) => i === nodeIdx ? 'active' : v))
+        setCalledCount(c => c + 1)
+        calledIdx.current += 1
+      }
+    } else if (curr < prev) {
+      const nodeIdx = RETURN_ORDER[resolvedIdx.current]
+      if (nodeIdx !== undefined) {
+        setNodeStatuses(s => s.map((v, i) => i === nodeIdx ? 'resolved' : v))
+        setNodeValues(v => v.map((x, i) => i === nodeIdx ? FIB_TREE[nodeIdx].value : x))
+        resolvedIdx.current += 1
+      }
+    }
+
+    prevClonesLen.current = curr
+  }, [clones]) // eslint-disable-line
+
+  const isWrong = simOutcome === 'wrongResult'
+  const stars   = calledCount <= 15 ? 3 : calledCount <= 20 ? 2 : 1
+
+  return (
+    <div className={styles.scene}>
+      <div className={styles.bgSky} />
+      <div className={styles.bgMid} />
+      <AmbientParticles />
+
+      {/* Connector lines */}
+      <svg className={styles.fibTreeSvg} viewBox="0 0 100 100" preserveAspectRatio="none">
+        {FIB_EDGES.map(([a, b]) => {
+          const aStatus  = nodeStatuses[a]
+          const bStatus  = nodeStatuses[b]
+          const resolved = aStatus === 'resolved' && bStatus === 'resolved'
+          const active   = aStatus !== 'hidden'   && bStatus !== 'hidden'
+          return (
+            <line
+              key={`${a}-${b}`}
+              x1={FIB_TREE[a].x} y1={FIB_TREE[a].y + 4}
+              x2={FIB_TREE[b].x} y2={FIB_TREE[b].y}
+              stroke={resolved ? '#4ade80' : active ? '#818cf8' : '#1e293b'}
+              strokeWidth="0.8"
+              strokeDasharray={active && !resolved ? '2,2' : 'none'}
+            />
+          )
+        })}
+      </svg>
+
+      {/* Tree nodes */}
+      {FIB_TREE.map((node, i) => {
+        const status    = nodeStatuses[i]
+        const isSuccess = characterAtEnd && i === 0
+        const wrongRoot = isWrong && i === 0
+        const classNames = [
+          styles.fibNode,
+          status === 'hidden'                                  ? styles.fibNodeHidden   : '',
+          status === 'active'  && !wrongRoot                   ? styles.fibNodeActive   : '',
+          status === 'overflow'                                ? styles.fibNodeGlitch   : '',
+          status === 'resolved' && node.isBase                 ? styles.fibNodeBase     : '',
+          status === 'resolved' && !node.isBase && !isSuccess  ? styles.fibNodeResolved : '',
+          isSuccess                                            ? styles.fibNodeGold     : '',
+          wrongRoot                                            ? styles.fibNodeWrong    : '',
+          rippling                                             ? styles.fibNodeRipple   : '',
+        ].filter(Boolean).join(' ')
+        return (
+          <div
+            key={i}
+            className={classNames}
+            style={{
+              left: `${node.x}%`,
+              top:  `${node.y}%`,
+              ...(rippling ? { animationDelay: `${NODE_ROW[i] * 80}ms` } : {}),
+            }}
+          >
+            <div className={styles.fibNodeLabel}>{node.label}</div>
+            <div className={`${styles.fibNodeValue} ${wrongRoot ? styles.fibNodeValueWrong : ''}`}>
+              {wrongRoot
+                ? simResult
+                : (status === 'resolved' || isSuccess)
+                  ? (nodeValues[i] ?? node.value)
+                  : '?'
+              }
+            </div>
+          </div>
+        )
+      })}
+
+      {/* Call counter HUD */}
+      <motion.div
+        className={styles.fibCallCounter}
+        animate={{ color: characterAtEnd ? '#4ade80' : '#7dd3fc' }}
+      >
+        CALLS: {calledCount} / 15
+      </motion.div>
+
+      {/* Star rating on success */}
+      <AnimatePresence>
+        {showStars && (
+          <motion.div
+            className={styles.fibStarRow}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          >
+            <div className={styles.fibStarIcons}>
+              {[1, 2, 3].map(s => (
+                <motion.span
+                  key={s}
+                  className={`${styles.fibStar} ${s <= stars ? styles.fibStarActive : ''}`}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: s * 0.12, type: 'spring', stiffness: 300, damping: 15 }}
+                >
+                  ★
+                </motion.span>
+              ))}
+            </div>
+            <div className={styles.fibStarLabel}>
+              {stars === 3 ? 'PERFECT — 15 CALLS' : stars === 2 ? `${calledCount} CALLS` : `${calledCount} CALLS — INEFFICIENT`}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Character */}
+      <motion.div
+        className={styles.fibMainChar}
+        initial={{ left: '-12%' }}
+        animate={{ left: `${charX}%` }}
+        transition={{ duration: 1.0, ease: 'easeInOut' }}
+      >
+        <Character state={charState} depth={0} />
+      </motion.div>
+    </div>
+  )
+}
+
 // ── SceneView router ──────────────────────────────────────────────────────────
 
-export default function SceneView({ level, clones, characterAtEnd }) {
-  if (level.id === 1) {
-    return <Level1Scene clones={clones} characterAtEnd={characterAtEnd} level={level} />
-  }
+export default function SceneView({ level, clones, characterAtEnd, simOutcome, simResult, resetCount }) {
+  if (level.id === 1) return <Level1Scene clones={clones} characterAtEnd={characterAtEnd} level={level} />
+  if (level.id === 3) return <Level3Scene clones={clones} characterAtEnd={characterAtEnd} simOutcome={simOutcome} simResult={simResult} resetCount={resetCount} />
   return <Level2Scene clones={clones} characterAtEnd={characterAtEnd} level={level} />
 }

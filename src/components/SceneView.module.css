@@ -353,6 +353,222 @@
    LEVEL 2 — Coin Stack
 ═══════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════
+   LEVEL 3 — Fibonacci Game Tree
+═══════════════════════════════════════════════ */
+
+.fibTreeSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 90%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Base node — positioned via inline left/top */
+.fibNode {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  min-width: 44px;
+  text-align: center;
+  z-index: 5;
+  background: rgba(15, 10, 40, 0.7);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+/* Hidden — dark with faint border, shows '?' */
+.fibNodeHidden {
+  opacity: 0.35;
+  border-color: rgba(99, 102, 241, 0.12);
+}
+
+/* Active — purple pulse */
+.fibNodeActive {
+  border-color: rgba(129, 140, 248, 0.75);
+  background: rgba(20, 15, 60, 0.95);
+  box-shadow: 0 0 10px rgba(129, 140, 248, 0.4);
+  animation: fibPulse 0.9s ease-in-out infinite alternate;
+}
+
+/* Resolved non-base — green glow in */
+.fibNodeResolved {
+  border-color: rgba(34, 197, 94, 0.65);
+  background: rgba(10, 30, 18, 0.92);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+  animation: fibResolveIn 0.35s ease-out both;
+}
+
+/* Resolved base case — gold pulse */
+.fibNodeBase {
+  border-color: rgba(251, 191, 36, 0.7);
+  background: rgba(30, 20, 5, 0.92);
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+  animation: fibGoldPulse 1.1s ease-in-out infinite alternate;
+}
+
+/* Root success — bright gold */
+.fibNodeGold {
+  border-color: #fbbf24 !important;
+  background: rgba(40, 28, 5, 0.97) !important;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.65), 0 0 40px rgba(251, 191, 36, 0.25) !important;
+  animation: fibGoldPulse 0.7s ease-in-out infinite alternate !important;
+}
+
+/* Wrong answer — red flash on root */
+.fibNodeWrong {
+  border-color: rgba(239, 68, 68, 0.85) !important;
+  background: rgba(40, 5, 5, 0.97) !important;
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.6) !important;
+  animation: fibShake 0.45s ease-in-out both !important;
+}
+
+/* Overflow — glitch shake on active nodes */
+.fibNodeGlitch {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  background: rgba(30, 5, 5, 0.92) !important;
+  animation: fibShake 0.35s ease-in-out infinite !important;
+}
+
+/* Success ripple wave (animationDelay set inline per row) */
+.fibNodeRipple {
+  animation: fibRipple 0.55s ease-out both !important;
+}
+
+/* Node label (fib(n) text) */
+.fibNodeLabel {
+  font-family: var(--font);
+  font-size: 8px;
+  color: rgba(165, 180, 252, 0.45);
+  letter-spacing: 0.4px;
+  line-height: 1;
+}
+
+.fibNodeActive .fibNodeLabel   { color: #a5b4fc; }
+.fibNodeResolved .fibNodeLabel { color: #86efac; }
+.fibNodeBase .fibNodeLabel     { color: #fde68a; }
+.fibNodeGold .fibNodeLabel     { color: #fde68a !important; }
+.fibNodeWrong .fibNodeLabel    { color: #fca5a5 !important; }
+
+/* Node value */
+.fibNodeValue {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  line-height: 1;
+}
+
+.fibNodeResolved .fibNodeValue { color: #4ade80; }
+.fibNodeBase .fibNodeValue     { color: #fbbf24; }
+.fibNodeGold .fibNodeValue     { color: #fbbf24 !important; font-size: 14px; }
+
+.fibNodeValueWrong {
+  color: #ef4444 !important;
+}
+
+/* Call counter HUD — top-right */
+.fibCallCounter {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 700;
+  color: #7dd3fc;
+  background: rgba(10, 8, 28, 0.8);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 4px;
+  padding: 3px 8px;
+  z-index: 20;
+  letter-spacing: 0.5px;
+}
+
+/* Star rating row */
+.fibStarRow {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 20;
+  background: rgba(10, 8, 28, 0.88);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 6px;
+  padding: 6px 16px;
+}
+
+.fibStarIcons {
+  display: flex;
+  gap: 6px;
+}
+
+.fibStar {
+  font-size: 22px;
+  color: rgba(99, 102, 241, 0.25);
+}
+
+.fibStarActive {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.65));
+}
+
+.fibStarLabel {
+  font-family: var(--font);
+  font-size: 9px;
+  color: #fde68a;
+  letter-spacing: 0.8px;
+}
+
+.fibMainChar {
+  position: absolute;
+  bottom: 4%;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+/* ── Keyframes ── */
+
+@keyframes fibPulse {
+  0%   { box-shadow: 0 0 6px rgba(129, 140, 248, 0.3); }
+  100% { box-shadow: 0 0 16px rgba(129, 140, 248, 0.65); }
+}
+
+@keyframes fibGoldPulse {
+  0%   { box-shadow: 0 0 8px rgba(251, 191, 36, 0.3); }
+  100% { box-shadow: 0 0 22px rgba(251, 191, 36, 0.7); }
+}
+
+@keyframes fibResolveIn {
+  0%   { transform: translate(-50%, -50%) scale(0.85); opacity: 0.4; }
+  60%  { transform: translate(-50%, -50%) scale(1.06); }
+  100% { transform: translate(-50%, -50%) scale(1);    opacity: 1; }
+}
+
+@keyframes fibRipple {
+  0%   { transform: translate(-50%, -50%) scale(1);    filter: brightness(1); }
+  40%  { transform: translate(-50%, -50%) scale(1.14); filter: brightness(1.5) drop-shadow(0 0 10px #fbbf24); }
+  100% { transform: translate(-50%, -50%) scale(1);    filter: brightness(1); }
+}
+
+@keyframes fibShake {
+  0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+  20%       { transform: translate(-50%, -50%) translateX(-4px); }
+  40%       { transform: translate(-50%, -50%) translateX(4px); }
+  60%       { transform: translate(-50%, -50%) translateX(-3px); }
+  80%       { transform: translate(-50%, -50%) translateX(3px); }
+}
+
 /* Coin pile container — sits above right platform surface */
 .coinPile {
   position: absolute;

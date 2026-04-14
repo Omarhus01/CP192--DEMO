@@ -185,6 +185,12 @@ function determineOutcome(level, callCount, result) {
     return 'wrongResult'
   }
 
+  if (level.id === 3) {
+    if (callCount <= 1) return 'earlyExit'
+    if (result === (level.expectedResult ?? 5)) return 'success'
+    return 'wrongResult'
+  }
+
   return callCount > 1 ? 'success' : 'earlyExit'
 }
 

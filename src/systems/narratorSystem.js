@@ -69,6 +69,11 @@ export const LINES = {
     "You solved Level One on the first attempt. I've adjusted Level Two to be slightly less forgiving. You're welcome.",
   ],
 
+  level3Intro: [
+    "Level Three. Fibonacci. Your function will call itself twice per invocation. Watch the call stack carefully — it does not build a line. It builds a tree.",
+    "fib(5). The answer is 5. The number of function calls required to get there is fifteen. I will give you a moment to consider what that means before you proceed.",
+  ],
+
   // ── Wrong answers ──────────────────────────────────────────────────────────
 
   noBaseCase: [
@@ -98,10 +103,22 @@ export const LINES = {
     "I had a progression prepared. You skipped it. I'm going to need a moment.",
   ],
 
+  level3EarlyExit: [
+    "You returned immediately. fib(5) ran once, looked at n, and stopped. The tree that should have fifteen branches has one node. That node is wrong. I'd like you to reconsider your life choices and also your base case.",
+    "There was no branching. There was barely a function call. fib(5) is supposed to call fib(4) and fib(3). It did not call either. I'm curious what you thought would happen.",
+    "The tree has one node. It is yours. It is wrong. Recursion requires recursive calls — specifically fib(n-1) and fib(n-2). Neither appear. I've looked.",
+  ],
+
   wrongResult: [
     "The function ran. The chain resolved. The answer is wrong. count(5) should return 5. Check what you're returning at each step — something in the arithmetic isn't adding up.",
     "The recursion worked. The return chain ran. The number at the top is incorrect. Your base case or your return value is off. One of those two things.",
     "Close. The structure is right. The numbers are wrong. Every clone did its job and the answer is still wrong, which means the job you gave them was wrong.",
+  ],
+
+  level3WrongResult: [
+    "The tree resolved. Every branch calculated. Every clone returned. The root says the wrong number. fib(5) is 5. Yours is not 5. I'm going to let you sit with that.",
+    "Fifteen function calls. All fifteen returned. The number at the top is still wrong. Check what fib(0) and fib(1) actually return — your base case is lying to you.",
+    "The structure is correct. The arithmetic is not. Either your base case returns the wrong value, or your recursive case adds the wrong things. One of those two. This is my gift to you.",
   ],
 
   wrongDepth: [

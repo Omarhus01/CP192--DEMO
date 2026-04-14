@@ -44,13 +44,13 @@ export function getIdleTrigger(idleSeconds) {
 /**
  * Returns the narrator trigger key for a given simulation outcome.
  */
-export function outcomeToNarratorTrigger(outcome, isFirstAttempt) {
+export function outcomeToNarratorTrigger(outcome, isFirstAttempt, levelId) {
   switch (outcome) {
     case 'success':     return isFirstAttempt ? 'correctFirstTry' : 'correct'
     case 'overflow':    return 'noBaseCase'
-    case 'earlyExit':   return 'earlyExit'
+    case 'earlyExit':   return levelId === 3 ? 'level3EarlyExit' : 'earlyExit'
     case 'wrongDepth':  return 'wrongDepth'
-    case 'wrongResult': return 'wrongResult'
+    case 'wrongResult': return levelId === 3 ? 'level3WrongResult' : 'wrongResult'
     default:            return 'correct'
   }
 }

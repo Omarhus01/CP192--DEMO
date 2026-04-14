@@ -12,7 +12,7 @@ const LEVELS_DATA = [
   { id: 8, name: 'FINAL ASSESSMENT', topic: 'Full Application'         },
 ]
 
-const ACTUAL_LEVELS = 2
+const ACTUAL_LEVELS = 3
 
 function getStatus(levelIdx, completedLevels) {
   if (completedLevels.includes(levelIdx)) return 'complete'

@@ -43,6 +43,7 @@ export default function App() {
     catch { return [] }
   })
   const [checkpoints,          setCheckpoints]          = useState({})
+  const [bestTimes,            setBestTimes]            = useState({})
   const [pyodideReady,         setPyodideReady]         = useState(false)
   const [authChecked,          setAuthChecked]          = useState(false)
   const [currentUser,          setCurrentUser]          = useState(null)
@@ -62,6 +63,7 @@ export default function App() {
         const data = await loadUserData(user.uid)
         setCompletedLevels(data.progress)
         setCheckpoints(data.checkpoints ?? {})
+        setBestTimes(data.bestTimes ?? {})
         setAuthChecked(true)
         setNarratorLine(LINES.dashboardScreen[0])
         setScreen('dashboard')
@@ -187,6 +189,7 @@ export default function App() {
     const data = await loadUserData(user.uid)
     setCompletedLevels(data.progress)
     setCheckpoints(data.checkpoints ?? {})
+    setBestTimes(data.bestTimes ?? {})
     setNarratorLine(LINES.dashboardScreen[0])
     navigateTo('dashboard')
   }
@@ -213,10 +216,10 @@ export default function App() {
   }
 
   // ── Dashboard level card click → jump to that level ──────────────────────────
-  function handleDashboardLevelSelect(idx) {
+  function handleDashboardLevelSelect(idx, phase) {
     setLevelIndex(idx)
     setNarratorState(prev => ({ ...prev, attemptCount: 0 }))
-    const savedPhase = checkpoints[String(idx)] ?? 'guided'
+    const savedPhase = phase ?? checkpoints[String(idx)] ?? 'guided'
     setOverflowReturnPhase(savedPhase)
     navigateTo('level')
   }
@@ -254,6 +257,7 @@ export default function App() {
     setCurrentUser(null)
     setCompletedLevels([])
     setCheckpoints({})
+    setBestTimes({})
     setNarratorState(INITIAL_NARRATOR)
     setLevelIndex(0)
     navigateTo('login')
@@ -351,6 +355,7 @@ export default function App() {
         <DashboardScreen
           completedLevels={completedLevels}
           checkpoints={checkpoints}
+          bestTimes={bestTimes}
           onContinue={handleDashboardContinue}
           onLevelSelect={handleDashboardLevelSelect}
           onLockedLevel={handleLockedLevel}

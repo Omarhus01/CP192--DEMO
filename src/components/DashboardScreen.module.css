@@ -65,6 +65,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px; width: 100%;
+  align-items: start;
 }
 
 .card {
@@ -162,6 +163,94 @@
   font-size: 10px;
   opacity: 0.4;
 }
+
+/* ── Replay / Phase selection (complete cards) ─────────── */
+
+.bestTimeChip {
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #4ade80;
+  border: 1px solid #4ade80;
+  padding: 2px 7px;
+  border-radius: 2px;
+  margin-top: 4px;
+}
+
+.phaseSelector {
+  display: flex;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.phaseBtn {
+  font-family: var(--font);
+  font-size: 8px;
+  letter-spacing: 1px;
+  padding: 3px 7px;
+  border-radius: 2px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.phaseBtn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.phaseBtnActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.phaseBtnActive:hover {
+  background: #ea8a2e;
+  border-color: #ea8a2e;
+}
+
+.replayBtn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px;
+  background: transparent;
+  border: 1px solid var(--green);
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 9px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.replayBtn:hover {
+  background: rgba(22, 163, 74, 0.1);
+  box-shadow: 0 0 10px rgba(22, 163, 74, 0.2);
+}
+
+/* ── Resume button (in-progress active cards) ──────────── */
+
+.resumeBtn {
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px;
+  background: transparent;
+  border: 1px solid var(--blue);
+  color: var(--blue);
+  font-family: var(--font);
+  font-size: 9px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.resumeBtn:hover { background: var(--blue-bg); }
 
 /* ── Continue button ──────────────────────────────────── */
 

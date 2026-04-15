@@ -3,11 +3,12 @@ import { db } from './firebaseConfig.js'
 
 export async function loadUserData(uid) {
   const snap = await getDoc(doc(db, 'users', uid))
-  if (!snap.exists()) return { progress: [], checkpoints: {} }
+  if (!snap.exists()) return { progress: [], checkpoints: {}, bestTimes: {} }
   const data = snap.data()
   return {
     progress:    data.progress    ?? [],
     checkpoints: data.checkpoints ?? {},
+    bestTimes:   data.bestTimes   ?? {},
   }
 }
 

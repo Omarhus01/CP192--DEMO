@@ -160,6 +160,30 @@ export const LINES = {
     "Every version of you that reset was slightly closer to having it. Think about that before you reset again.",
   ],
 
+  newBestTime: [
+    "New record. Don't let it go to your head.",
+    "Faster. I'm almost impressed. Almost.",
+    "Personal best. I've updated my expectations. Slightly upward.",
+    "That's a new best. I had a time logged. You beat it. I have feelings about this.",
+  ],
+
+  missedBestTime: [
+    "Still {diff} seconds off your best. The gap is noted.",
+    "Slower than last time. Interesting strategic choice.",
+    "Your best was {best}. This was {current}. The math is not in your favor.",
+  ],
+
+  resetWarning: [
+    "Resetting. Bold move.",
+    "Again. The clock remembers, even if you'd prefer it didn't.",
+    "Last one. The reset button is now decorative.",
+  ],
+
+  resetCheater: [
+    "Interesting. The official time is {timerA}. The actual time is {timerB}. I've logged both.",
+    "You reset {n} times. The clock kept running. It always keeps running.",
+  ],
+
   idle30: [
     "Still there? Take your time. I'm not going anywhere. This is my entire professional existence.",
     "No pressure. I've been standing here long enough to reconsider several life decisions.",

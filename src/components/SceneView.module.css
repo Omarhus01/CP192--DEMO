@@ -474,21 +474,38 @@
   color: #ef4444 !important;
 }
 
+
+.callsCounterLeft {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #7dd3fc;
+  z-index: 10;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+
 /* Call counter HUD — top-right */
 .fibCallCounter {
   position: absolute;
-  top: 8px;
-  right: 10px;
-  font-family: var(--font);
-  font-size: 10px;
-  font-weight: 700;
+  top: 12px;
+  right: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
   color: #7dd3fc;
-  background: rgba(10, 8, 28, 0.8);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  border-radius: 4px;
+  z-index: 10;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(125, 211, 252, 0.2);
   padding: 3px 8px;
-  z-index: 20;
-  letter-spacing: 0.5px;
+  border-radius: 3px;
 }
 
 /* Star rating row */

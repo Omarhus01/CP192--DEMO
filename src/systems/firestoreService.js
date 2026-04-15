@@ -26,3 +26,27 @@ export async function saveCheckpoint(uid, levelIdx, phase) {
     { merge: true }
   )
 }
+
+export async function getBestTime(uid, levelId) {
+  const snap = await getDoc(doc(db, 'users', uid))
+  if (!snap.exists()) return null
+  const data = snap.data()
+  return data.bestTimes?.[String(levelId)] ?? null
+}
+
+export async function setBestTime(uid, levelId, timeSeconds) {
+  const snap = await getDoc(doc(db, 'users', uid))
+  const existing = snap.exists() ? (snap.data().bestTimes ?? {}) : {}
+  const previousBest = existing[String(levelId)] ?? null
+  const isNewBest = previousBest === null || timeSeconds < previousBest
+
+  if (isNewBest) {
+    await setDoc(
+      doc(db, 'users', uid),
+      { bestTimes: { ...existing, [String(levelId)]: timeSeconds } },
+      { merge: true }
+    )
+  }
+
+  return { isNewBest, previousBest }
+}

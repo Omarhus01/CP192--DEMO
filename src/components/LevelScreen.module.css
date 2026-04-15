@@ -416,3 +416,69 @@
   from { opacity: 0; transform: scale(0.3); }
   to   { opacity: 1; transform: scale(1); }
 }
+
+/* ── Timer + Calls HUD ── */
+
+.timerBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 72px;
+}
+
+.timerA {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  color: #7dd3fc;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timerFrozen  { color: #4ade80; animation: timerPop 0.4s ease-out; }
+.timerNewBest { color: #4ade80; }
+
+.newBestBadge {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: #4ade80;
+  border: 1px solid #4ade80;
+  padding: 1px 5px;
+  border-radius: 2px;
+  animation: badgePop 0.5s ease-out;
+}
+
+.timerBest {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #475569;
+  letter-spacing: 0.03em;
+}
+
+.timerB {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #f97316;
+  letter-spacing: 0.03em;
+}
+
+.callsHud {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+@keyframes timerPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@keyframes badgePop {
+  0%   { transform: scale(0); opacity: 0; }
+  70%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}

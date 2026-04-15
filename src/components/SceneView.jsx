@@ -52,6 +52,15 @@ function Level1Scene({ clones, characterAtEnd, level }) {
   const [walkDuration, setWalkDuration] = useState(1.0)
   const [charState,    setCharState]    = useState('idle')
   const [doorGlow,     setDoorGlow]     = useState(false)
+  const [maxCalls,     setMaxCalls]     = useState(0)
+  const maxCallsRef = useRef(0)
+
+  useEffect(() => {
+    if (clones.length > maxCallsRef.current) {
+      maxCallsRef.current = clones.length
+      setMaxCalls(clones.length)
+    }
+  }, [clones])
 
   // Building geometry — all in scene-% coordinates
   const GROUND_PCT = 14                         // ground bar height
@@ -107,6 +116,7 @@ function Level1Scene({ clones, characterAtEnd, level }) {
       <div className={styles.bgMid} />
       <div className={styles.groundBar} />
       <AmbientParticles />
+      {maxCalls > 0 && <div className={styles.callsCounterLeft}>CALLS: {maxCalls}</div>}
 
       {/* ── Building ── */}
       <div className={styles.building}>
@@ -193,6 +203,15 @@ function Level2Scene({ clones, characterAtEnd, level }) {
   const [charX,      setCharX]      = useState(-12)
   const [walkDur,    setWalkDur]    = useState(1.0)
   const [showTotal,  setShowTotal]  = useState(false)
+  const [maxCalls,   setMaxCalls]   = useState(0)
+  const maxCallsRef = useRef(0)
+
+  useEffect(() => {
+    if (clones.length > maxCallsRef.current) {
+      maxCallsRef.current = clones.length
+      setMaxCalls(clones.length)
+    }
+  }, [clones])
 
   // Walk in from left on mount
   useEffect(() => {
@@ -218,6 +237,7 @@ function Level2Scene({ clones, characterAtEnd, level }) {
       <div className={styles.bgSky} />
       <div className={styles.bgMid} />
       <AmbientParticles />
+      {maxCalls > 0 && <div className={styles.callsCounterLeft}>CALLS: {maxCalls}</div>}
 
       {/* ── Left platform — character + clones ── */}
       <div className={styles.platformLeft}>
@@ -498,13 +518,6 @@ function Level3Scene({ clones, characterAtEnd, simOutcome, simResult, resetCount
         )
       })}
 
-      {/* Call counter HUD */}
-      <motion.div
-        className={styles.fibCallCounter}
-        animate={{ color: characterAtEnd ? '#4ade80' : '#7dd3fc' }}
-      >
-        CALLS: {calledCount} / 15
-      </motion.div>
 
       {/* Star rating on success */}
       <AnimatePresence>
@@ -534,6 +547,14 @@ function Level3Scene({ clones, characterAtEnd, simOutcome, simResult, resetCount
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Call counter HUD */}
+      <motion.div
+        className={styles.fibCallCounter}
+        animate={{ color: characterAtEnd ? '#4ade80' : '#7dd3fc' }}
+      >
+        CALLS: {calledCount} / 15
+      </motion.div>
 
       {/* Character */}
       <motion.div

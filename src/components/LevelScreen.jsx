@@ -6,10 +6,19 @@ import NarratorBox     from './NarratorBox.jsx'
 import PhaseIndicator  from './PhaseIndicator.jsx'
 import ScaffoldEditor  from './ScaffoldEditor.jsx'
 import { executeCode, isUnrecognizedCode } from '../systems/codeExecutor.js'
+import { getBestTime, setBestTime } from '../systems/firestoreService.js'
 import { didIgnoreCallStack, getIdleTrigger, outcomeToNarratorTrigger } from '../systems/edgeCaseDetector.js'
 import { getLine, getExpression, speak, getSyntaxRepeatLine, LINES } from '../systems/narratorSystem.js'
 import { playSpawnSound, playSuccessSound, playOverflowSound, playNarratorClick } from '../systems/audioSystem.js'
 import styles from './LevelScreen.module.css'
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatTime(s) {
+  const m   = Math.floor(s / 60)
+  const sec = (s % 60).toFixed(1)
+  return m + ':' + sec.padStart(4, '0')
+}
 
 // ── Speed config ──────────────────────────────────────────────────────────────
 
@@ -67,7 +76,7 @@ function reducer(state, action) {
 
 export default function LevelScreen({
   level, initialPhase = 'guided', hasNextLevel = false, narratorState, lineTracker, isMuted,
-  onNarratorLine, onOverflow, onLevelComplete, onWrongAttempt, onCheckpoint, onDashboard,
+  onNarratorLine, onOverflow, onLevelComplete, onWrongAttempt, onCheckpoint, onDashboard, currentUser,
 }) {
   const [state, dispatch] = useReducer(reducer, initialPhase, (phase) => makeInitial(level, phase))
   const [speed, setSpeed] = useState(level.id === 3 ? 'normal' : 'slow')
@@ -75,6 +84,18 @@ export default function LevelScreen({
   const [showNextBtn,    setShowNextBtn]    = useState(false)
   const [simOutcome,     setSimOutcome]     = useState(null)
   const [simResult,      setSimResult]      = useState(null)
+  const [timerA,         setTimerA]         = useState(0)
+  const [timerB,         setTimerB]         = useState(0)
+  const [timerFrozen,    setTimerFrozen]    = useState(false)
+  const [timerActive,    setTimerActive]    = useState(false)
+  const [showTimerB,     setShowTimerB]     = useState(false)
+  const [bestTime,       setBestTimeLocal]  = useState(null)
+  const [isNewBest,      setIsNewBest]      = useState(false)
+  const [callsDisplay,   setCallsDisplay]   = useState(0)
+  const timerARef        = useRef(0)
+  const timerBRef        = useRef(0)
+  const freeResetCount   = useRef(0)
+  const maxCallCount     = useRef(0)
   const pendingCompletionRef = useRef(null)
 
   const animTimerRef      = useRef(null)
@@ -113,6 +134,28 @@ export default function LevelScreen({
     speak(text, mut, ns.attemptCount)
   }
 
+  function fireNarratorWithIndex(key, index) {
+    const lines = LINES[key]
+    if (!lines) return
+    const text = lines[Math.min(index, lines.length - 1)]
+    onNarratorLineRef.current(text, lineTrackerRef.current)
+    playNarratorClick(isMutedRef.current)
+    speak(text, isMutedRef.current, narratorStateRef.current.attemptCount)
+  }
+
+  function fireNarratorWithParams(key, params) {
+    const lines = LINES[key]
+    if (!lines) return
+    const current = lineTrackerRef.current[key] ?? 0
+    let text = lines[current % lines.length]
+    Object.entries(params).forEach(([k, v]) => {
+      text = text.replace('{' + k + '}', v)
+    })
+    onNarratorLineRef.current(text, { ...lineTrackerRef.current, [key]: current + 1 })
+    playNarratorClick(isMutedRef.current)
+    speak(text, isMutedRef.current, narratorStateRef.current.attemptCount)
+  }
+
   // ── Idle timer ──────────────────────────────────────────────────────────────
 
   function resetIdle() { idleSecondsRef.current = 0 }
@@ -125,6 +168,71 @@ export default function LevelScreen({
       if (trigger && idleSecondsRef.current % 30 === 0) fireNarrator(trigger)
     }, 1000)
     return () => clearInterval(idleTimerRef.current)
+  }, []) // eslint-disable-line
+
+  // ── Load best time on mount ──────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!currentUser?.uid) return
+    getBestTime(currentUser.uid, level.id).then(t => setBestTimeLocal(t))
+  }, [level.id]) // eslint-disable-line
+
+  // ── Start timer when free phase begins ───────────────────────────────────────
+
+  useEffect(() => {
+    if (state.levelPhase !== 'free') return
+    setTimerActive(true)
+    setTimerFrozen(false)
+    timerARef.current = 0
+    timerBRef.current = 0
+    setTimerA(0)
+    setTimerB(0)
+    freeResetCount.current = 0
+    setShowTimerB(false)
+  }, [state.levelPhase]) // eslint-disable-line
+
+  // ── Timer interval ───────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!timerActive || timerFrozen) return
+    const interval = setInterval(() => {
+      timerARef.current = Math.round((timerARef.current + 0.1) * 10) / 10
+      timerBRef.current = Math.round((timerBRef.current + 0.1) * 10) / 10
+      setTimerA(timerARef.current)
+      setTimerB(timerBRef.current)
+    }, 100)
+    return () => clearInterval(interval)
+  }, [timerActive, timerFrozen])
+
+  // ── Track max call depth for CALLS HUD ───────────────────────────────────────
+
+  useEffect(() => {
+    const curr = state.clones.length
+    if (curr > maxCallCount.current) {
+      maxCallCount.current = curr
+      setCallsDisplay(curr)
+    }
+  }, [state.clones]) // eslint-disable-line
+
+  // ── initialPhase narrator — fires when jumping directly to scaffold or free ──
+
+  useEffect(() => {
+    if (initialPhase === 'scaffold' && level.scaffoldIntroLine) {
+      setTimeout(() => {
+        const mut = isMutedRef.current
+        onNarratorLineRef.current(level.scaffoldIntroLine, lineTrackerRef.current)
+        playNarratorClick(mut)
+        speak(level.scaffoldIntroLine, mut, narratorStateRef.current.attemptCount)
+      }, 800)
+    }
+    if (initialPhase === 'free' && level.freePhaseIntro) {
+      setTimeout(() => {
+        const mut = isMutedRef.current
+        onNarratorLineRef.current(level.freePhaseIntro, lineTrackerRef.current)
+        playNarratorClick(mut)
+        speak(level.freePhaseIntro, mut, narratorStateRef.current.attemptCount)
+      }, 800)
+    }
   }, []) // eslint-disable-line
 
   // ── Level intro (only when no guided steps) ─────────────────────────────────
@@ -300,6 +408,15 @@ export default function LevelScreen({
   }
 
   function handleReset() {
+    if (stateRef.current.levelPhase === 'free') {
+      freeResetCount.current += 1
+      setShowTimerB(true)
+      timerARef.current = 0
+      setTimerA(0)
+      fireNarratorWithIndex('resetWarning', freeResetCount.current - 1)
+    }
+    maxCallCount.current = 0
+    setCallsDisplay(0)
     resetIdle()
     clearTimeout(animTimerRef.current)
     const newCount = stateRef.current.resetCount + 1
@@ -312,6 +429,13 @@ export default function LevelScreen({
       const scene = document.getElementById('puzzle-scene')
       if (scene) { scene.classList.add('glitch'); setTimeout(() => scene.classList.remove('glitch'), 500) }
     }
+  }
+
+  function handleDashboard() {
+    if (state.phase === 'animating') {
+      if (!window.confirm('Leave this run? Current progress will be lost.')) return
+    }
+    onDashboard()
   }
 
   function handleHint() {
@@ -379,6 +503,37 @@ export default function LevelScreen({
     const lt      = lineTrackerRef.current
     const isFirst = ns.attemptCount === 0
     const s       = stateRef.current
+
+    // ── Timer: freeze on success, save best time ──────────────────────────────
+    if (s.levelPhase === 'free') {
+      setTimerFrozen(true)
+      const finalTime = timerARef.current
+      const realTime  = timerBRef.current
+      const uid = currentUser?.uid
+      if (uid) {
+        setBestTime(uid, level.id, finalTime).then(({ isNewBest: newBest, previousBest }) => {
+          setIsNewBest(newBest)
+          if (newBest) {
+            setBestTimeLocal(finalTime)
+            fireNarrator('newBestTime')
+          } else if (previousBest !== null) {
+            const diff = Math.round((finalTime - previousBest) * 10) / 10
+            fireNarratorWithParams('missedBestTime', {
+              diff,
+              best: formatTime(previousBest),
+              current: formatTime(finalTime),
+            })
+          }
+          if (freeResetCount.current > 0 && realTime > finalTime + 30) {
+            setTimeout(() => fireNarratorWithParams('resetCheater', {
+              timerA: formatTime(finalTime),
+              timerB: formatTime(realTime),
+              n: freeResetCount.current,
+            }), 2500)
+          }
+        })
+      }
+    }
 
     // ── Scaffold phase success: transition to free ─────────────────────────────
     if (s.levelPhase === 'scaffold') {
@@ -495,10 +650,28 @@ export default function LevelScreen({
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           {onDashboard && (
-            <button className={styles.dashboardBtn} onClick={onDashboard}>← DASHBOARD</button>
+            <button className={styles.dashboardBtn} onClick={handleDashboard}>← DASHBOARD</button>
           )}
           <span className={styles.levelTag}>LEVEL {level.id}</span>
           <span className={styles.levelTitle}>{level.title}</span>
+          {state.levelPhase === 'free' && (
+            <div className={styles.timerBlock}>
+              <div className={[
+                styles.timerA,
+                timerFrozen ? styles.timerFrozen : '',
+                isNewBest   ? styles.timerNewBest : '',
+              ].filter(Boolean).join(' ')}>
+                {formatTime(timerA)}
+                {isNewBest && <span className={styles.newBestBadge}>NEW BEST</span>}
+              </div>
+              {bestTime !== null && !isNewBest && (
+                <div className={styles.timerBest}>BEST {formatTime(bestTime)}</div>
+              )}
+              {showTimerB && (
+                <div className={styles.timerB}>REAL {formatTime(timerB)}</div>
+              )}
+            </div>
+          )}
         </div>
         <span className={styles.levelSubtitle}>{level.subtitle}</span>
         <div className={styles.speedControl}>
@@ -616,7 +789,7 @@ export default function LevelScreen({
                     <button
                       className={styles.btnReset}
                       onClick={handleReset}
-                      disabled={isAnimBusy}
+                      disabled={isAnimBusy || (state.levelPhase === 'free' && freeResetCount.current >= 3)}
                     >
                       RESET
                     </button>

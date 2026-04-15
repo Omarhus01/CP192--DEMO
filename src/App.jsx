@@ -373,6 +373,7 @@ export default function App() {
           onWrongAttempt={handleWrongAttempt}
           onCheckpoint={handleCheckpoint}
           onDashboard={() => navigateTo('dashboard')}
+          currentUser={currentUser}
         />
       )}
 

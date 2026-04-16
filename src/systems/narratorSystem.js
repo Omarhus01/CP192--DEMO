@@ -121,6 +121,45 @@ export const LINES = {
     "The structure is correct. The arithmetic is not. Either your base case returns the wrong value, or your recursive case adds the wrong things. One of those two. This is my gift to you.",
   ],
 
+  missingCondition: [
+    "There is no if statement. No base case. No stopping condition. The function calls itself, which calls itself, which calls itself. I can keep going. So can the function. That is the problem.",
+    "I see no conditional. The function recurses with nothing to stop it. One if statement. That is all I am asking for. One.",
+  ],
+
+  missingRecursion: [
+    "The function runs once and returns. There is no recursive call. The clone does nothing with the clone below it. That is the entire point of this exercise — calling the function inside itself.",
+    "No recursive call. The function solves the first case and stops. I need you to call the function inside itself. That is what recursion is.",
+  ],
+
+  discardedReturn: [
+    "You called count(coins - 1) but ignored what it returned. That return value is the accumulation — it is how the total builds. You need: return 1 + count(coins - 1). The 1 plus whatever came back.",
+    "The recursive call happened. The result was discarded. Every clone below you did work and you threw it away. return 1 + count(coins - 1) is what you need.",
+  ],
+
+  wrongArithmetic: [
+    "The structure is right. The arithmetic is wrong. Each clone should return 1 plus what the clone below returned. Something in that addition is off.",
+    "Recursive calls are happening. Return values are travelling up. The final number is wrong. Check what you are adding at each step — the pattern should be 1 plus whatever came back.",
+  ],
+
+  missingBranch: [
+    "You wrote one recursive call. Fibonacci requires two. fib(n-1) handles the left branch. fib(n-2) handles the right. Both are required. The tree has two sides. You built one.",
+    "One branch. The tree needs two. return fib(n-1) + fib(n-2) — not one of them. The missing branch is why the answer is wrong. I have counted the branches. There is one.",
+  ],
+
+  wrongBaseReturn: [
+    "Your base case returns 1 for both fib(0) and fib(1). fib(0) should return 0. Use return n — that gives fib(0)=0 and fib(1)=1 in one line. That extra 1 is compounding across every node in the tree.",
+    "fib(0) is 0. Your function returns 1 for fib(0). That error propagates through fifteen function calls. return n handles both base cases correctly in one line.",
+  ],
+
+  baseCaseOnly: [
+    "The base case fired but nothing accumulated. count(5) should add 1 at every step. If the result is 0, your recursive case is not returning anything — it is running and discarding.",
+  ],
+
+  infiniteArg: [
+    "Your recursive call passes the same argument. climb(floors) calls climb(floors) calls climb(floors). Nothing decreases. Nothing terminates. The argument must shrink — climb(floors - 1).",
+    "The recursive call uses the same value it received. That is an infinite loop. The argument must decrease each time — floors - 1 — so it eventually reaches the base case.",
+  ],
+
   wrongDepth: [
     "Your base case fired too early. I count five coins. You stopped before the stack was empty. The base case should trigger at zero — not before.",
     "The chain resolved, but the base case triggered before all coins were counted. Check your condition. It should be true only when there is truly nothing left.",

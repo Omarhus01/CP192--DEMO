@@ -7,9 +7,9 @@ import PhaseIndicator  from './PhaseIndicator.jsx'
 import ScaffoldEditor  from './ScaffoldEditor.jsx'
 import { executeCode, isUnrecognizedCode } from '../systems/codeExecutor.js'
 import { getBestTime, setBestTime } from '../systems/firestoreService.js'
-import { didIgnoreCallStack, getIdleTrigger, outcomeToNarratorTrigger } from '../systems/edgeCaseDetector.js'
+import { didIgnoreCallStack, getIdleTrigger, outcomeToNarratorTrigger, analyzeWrongCode } from '../systems/edgeCaseDetector.js'
 import { getLine, getExpression, speak, getSyntaxRepeatLine, LINES } from '../systems/narratorSystem.js'
-import { playSpawnSound, playSuccessSound, playOverflowSound, playNarratorClick } from '../systems/audioSystem.js'
+import { playSpawnSound, playSuccessSound, playOverflowSound, playNarratorClick, playWrongSound, playBaseCaseSound, playNewBestSound } from '../systems/audioSystem.js'
 import styles from './LevelScreen.module.css'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ function reducer(state, action) {
     case 'CHAR_AT_END':    return { ...state, characterAtEnd: true }
     case 'WRONG_STREAK':   return { ...state, wrongStreak: state.wrongStreak + 1 }
     case 'OPEN_HINT':      return { ...state, hintOpen: true }
-    case 'RESET':           return { ...makeInitial(action.level), resetCount: state.resetCount + 1, levelPhase: state.levelPhase, guidedStep: state.levelPhase === 'guided' ? state.guidedStep : 0 }
+    case 'RESET':           return { ...makeInitial(action.level), resetCount: state.resetCount + 1, levelPhase: state.levelPhase, guidedStep: state.levelPhase === 'guided' ? state.guidedStep : 0, wrongStreak: state.wrongStreak }
     case 'NEXT_GUIDED_STEP': return { ...state, guidedStep: state.guidedStep + 1 }
     case 'SET_LEVEL_PHASE':  return { ...state, levelPhase: action.payload }
     case 'SCAFFOLD_SUCCESS': return { ...makeInitial(action.level), resetCount: state.resetCount + 1, levelPhase: 'free' }
@@ -96,6 +96,7 @@ export default function LevelScreen({
   const timerBRef        = useRef(0)
   const freeResetCount   = useRef(0)
   const maxCallCount     = useRef(0)
+  const lastMistakeKeyRef = useRef(null)
   const pendingCompletionRef = useRef(null)
 
   const animTimerRef      = useRef(null)
@@ -301,6 +302,7 @@ export default function LevelScreen({
 
       case 'baseCase': {
         dispatch({ type: 'MARK_BASE' })
+        playBaseCaseSound(isMutedRef.current)
         // Trigger success overlay labels as soon as base case fires
         if (simResultRef.current?.outcome === 'success' && stateRef.current.levelPhase === 'free') {
           setSuccessOverlay(true)
@@ -416,6 +418,7 @@ export default function LevelScreen({
       fireNarratorWithIndex('resetWarning', freeResetCount.current - 1)
     }
     maxCallCount.current = 0
+    lastMistakeKeyRef.current = null
     setCallsDisplay(0)
     resetIdle()
     clearTimeout(animTimerRef.current)
@@ -439,7 +442,15 @@ export default function LevelScreen({
   }
 
   function handleHint() {
-    fireNarrator('hintGiven')
+    const mistakeKey   = lastMistakeKeyRef.current
+    const specificHint = mistakeKey && level.hints?.[mistakeKey]
+    if (specificHint) {
+      onNarratorLineRef.current(specificHint, lineTrackerRef.current)
+      playNarratorClick(isMutedRef.current)
+      speak(specificHint, isMutedRef.current, narratorStateRef.current.attemptCount)
+    } else {
+      fireNarrator('hintGiven')
+    }
     dispatch({ type: 'OPEN_HINT' })
   }
 
@@ -514,6 +525,7 @@ export default function LevelScreen({
         setBestTime(uid, level.id, finalTime).then(({ isNewBest: newBest, previousBest }) => {
           setIsNewBest(newBest)
           if (newBest) {
+            playNewBestSound(isMutedRef.current)
             setBestTimeLocal(finalTime)
             fireNarrator('newBestTime')
           } else if (previousBest !== null) {
@@ -610,11 +622,29 @@ export default function LevelScreen({
     onWrongAttempt?.()
     onlySyntaxErrorsRef.current = false
     dispatch({ type: 'WRONG_STREAK' })
-    const trigger = outcomeToNarratorTrigger(outcome, false, level.id)
-    fireNarrator(trigger)
+
+    const userCode   = stateRef.current.userCode ?? ''
+    const callCount  = simResultRef.current?.steps?.filter(s => s.type === 'call').length ?? 0
+    const mistakeKey = analyzeWrongCode(userCode, level, simResultRef.current?.result, callCount)
+    lastMistakeKeyRef.current = mistakeKey
+
+    const specificKeys = new Set([
+      'missingCondition', 'missingRecursion', 'discardedReturn',
+      'wrongArithmetic', 'missingBranch', 'wrongBaseReturn', 'baseCaseOnly', 'infiniteArg',
+    ])
+
+    if (specificKeys.has(mistakeKey)) {
+      fireNarrator(mistakeKey)
+    } else {
+      fireNarrator(outcomeToNarratorTrigger(outcome, false, level.id))
+    }
+
+    playWrongSound(isMutedRef.current)
     const scene = document.getElementById('puzzle-scene')
     if (scene) { scene.classList.add('wrongShake'); setTimeout(() => scene.classList.remove('wrongShake'), 250) }
-    setTimeout(() => { dispatch({ type: 'RESET', level }); simResultRef.current = null }, 2400)
+    if (!stateRef.current.hintOpen) {
+      setTimeout(() => { dispatch({ type: 'RESET', level }); simResultRef.current = null }, 2400)
+    }
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────

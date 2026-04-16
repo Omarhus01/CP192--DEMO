@@ -180,6 +180,56 @@ export function playOverflowSound(isMuted) {
   })
 }
 
+/** Short descending dissonant buzz — wrong answer */
+export function playWrongSound(isMuted) {
+  if (isMuted || !ensureCtx()) return
+  const now = ctx.currentTime
+  ;[300, 318].forEach(freq => {
+    const osc  = ctx.createOscillator()
+    const gain = sfxGain(0)
+    osc.type = 'square'
+    osc.frequency.setValueAtTime(freq, now)
+    osc.frequency.linearRampToValueAtTime(160, now + 0.2)
+    gain.gain.setValueAtTime(0.13, now)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25)
+    osc.connect(gain)
+    osc.start(now); osc.stop(now + 0.27)
+  })
+}
+
+/** Light ping — base case reached */
+export function playBaseCaseSound(isMuted) {
+  if (isMuted || !ensureCtx()) return
+  const now  = ctx.currentTime
+  const osc  = ctx.createOscillator()
+  const gain = sfxGain(0)
+  osc.type = 'sine'
+  osc.frequency.value = 880
+  gain.gain.setValueAtTime(0, now)
+  gain.gain.linearRampToValueAtTime(0.10, now + 0.01)
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3)
+  osc.connect(gain)
+  osc.start(now); osc.stop(now + 0.35)
+}
+
+/** Two-note ascending chime — new best time */
+export function playNewBestSound(isMuted) {
+  if (isMuted || !ensureCtx()) return
+  const now   = ctx.currentTime
+  ;[783.99, 1046.5].forEach((freq, i) => {
+    const osc  = ctx.createOscillator()
+    const gain = sfxGain(0)
+    const t    = now + i * 0.1
+    osc.type = 'sine'
+    osc.frequency.value = freq
+    gain.gain.setValueAtTime(0, t)
+    gain.gain.linearRampToValueAtTime(0.16, t + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4)
+    osc.connect(gain)
+    osc.start(t); osc.stop(t + 0.45)
+  })
+}
+
 /** Subtle UI click — narrator begins speaking */
 export function playNarratorClick(isMuted) {
   if (isMuted || !ensureCtx()) return

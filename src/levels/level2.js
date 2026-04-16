@@ -39,6 +39,13 @@ Each call waited for the one below it, then added 1 to the result. That is how r
 
   hint: `The base case is: if coins == 0, return 0. No coins left means nothing to count. The recursive case is: return 1 + count(coins - 1). You're holding one coin, and a clone is counting the rest. Add them together. That is the entire function. You now have the answer. Use it.`,
 
+  hints: {
+    missingRecursion: "You need: return 1 + count(coins - 1). The 1 is this clone's contribution. count(coins - 1) is the clone below doing the rest.",
+    discardedReturn: "You called count(coins - 1) but didn't use the result. You need: return 1 + count(coins - 1) — add 1 to whatever came back from below.",
+    wrongArithmetic: "Each clone returns 1 + count(coins - 1). Check every return statement — the 1 must be added at every step except the base case.",
+    baseCaseOnly: "Your recursive case isn't returning the right value. It should be: return 1 + count(coins - 1). The base case handles coins==0, everything else accumulates.",
+  },
+
   scene: {
     coinCount: 5,
   },

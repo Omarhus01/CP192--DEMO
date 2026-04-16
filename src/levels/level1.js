@@ -39,6 +39,12 @@ The function called itself with a smaller input each time, until it hit the base
 
   hint: `The base case is: if floors <= 1, return True. When there's one floor left, you're already close enough — stop there. The recursive call is: climb(floors - 1). One less floor each time, all the way down to one. That is the complete function. I have now given you the answer. Please write it.`,
 
+  hints: {
+    missingCondition: "You need an if statement first. if floors <= 1: return True — that is your base case. Without it the function never stops calling itself.",
+    missingRecursion: "After the base case, you need the recursive call: return climb(floors - 1). That is one fewer floor each time — eventually it reaches 1 and stops.",
+    infiniteArg: "Your recursive call passes floors unchanged. It needs to be floors - 1 so the problem shrinks each call. climb(floors - 1) not climb(floors).",
+  },
+
   scene: {
     floorCount: 5,
   },

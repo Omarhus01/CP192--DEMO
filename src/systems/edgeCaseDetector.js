@@ -42,6 +42,39 @@ export function getIdleTrigger(idleSeconds) {
 }
 
 /**
+ * Inspects the player's code string and returns a specific mistake key.
+ * Only called after a non-success, non-overflow, non-syntax outcome.
+ */
+export function analyzeWrongCode(userCode, level, result, callCount) {
+  const code = userCode ?? ''
+  const fn   = level.functionName + '('
+
+  if (level.id === 1) {
+    if (!code.includes('if')) return 'missingCondition'
+    if (!code.includes(fn))   return 'missingRecursion'
+    const infiniteRe = new RegExp(level.functionName + '\\(\\s*' + level.paramName + '\\s*\\)')
+    if (infiniteRe.test(code)) return 'infiniteArg'
+    return 'wrongResult'
+  }
+
+  if (level.id === 2) {
+    if (!code.includes(fn))   return 'missingRecursion'
+    if (!code.includes('+'))  return 'discardedReturn'
+    if (result === 0)         return 'baseCaseOnly'
+    return 'wrongArithmetic'
+  }
+
+  if (level.id === 3) {
+    const count = (code.split(fn).length - 1)
+    if (count < 2)     return 'missingBranch'
+    if (result === 8)  return 'wrongBaseReturn'
+    return 'wrongResult'
+  }
+
+  return 'wrongResult'
+}
+
+/**
  * Returns the narrator trigger key for a given simulation outcome.
  */
 export function outcomeToNarratorTrigger(outcome, isFirstAttempt, levelId) {

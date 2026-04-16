@@ -38,6 +38,11 @@ That is branching recursion.`,
 
   hint: `The base case: if n <= 1, return n. This handles both fib(0) = 0 and fib(1) = 1 in one line. The recursive case: return fib(n - 1) + fib(n - 2). Two separate calls, added together. Both are required. That is the complete function. You now have it.`,
 
+  hints: {
+    missingBranch: "Fibonacci needs two recursive calls: return fib(n-1) + fib(n-2). Both are required — one for the left branch, one for the right. One call gives the wrong answer.",
+    wrongBaseReturn: "Your base case should be: if n <= 1: return n. This gives fib(0)=0 and fib(1)=1 automatically. Using return 1 for both base cases adds an extra 1 to every path.",
+  },
+
   scene: {
     type: 'fib',
   },

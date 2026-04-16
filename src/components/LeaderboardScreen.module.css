@@ -1,0 +1,159 @@
+.screen {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center;
+  background: var(--bg);
+  padding-bottom: 100px;
+  overflow-y: auto;
+}
+
+.header {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 20px 0;
+}
+
+.backBtn {
+  font-family: var(--font);
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.backBtn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--text);
+}
+
+/* ── Tabs ─────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 28px;
+}
+
+.tab {
+  font-family: var(--font);
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 8px 22px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.tab:hover {
+  border-color: var(--blue);
+  color: var(--text);
+}
+
+.tabActive {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.tabActive:hover {
+  background: var(--blue-dim);
+  border-color: var(--blue-dim);
+}
+
+/* ── Table ────────────────────────────────────────────── */
+
+.tableWrapper {
+  width: 100%;
+  max-width: 680px;
+  margin-top: 24px;
+  padding: 0 20px;
+}
+
+.loading,
+.empty {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 48px 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.headerRow {
+  border-bottom: 1px solid var(--border);
+}
+
+.headerRow th {
+  font-family: var(--font);
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-weight: 700;
+  padding: 0 0 10px;
+  text-align: left;
+}
+
+.row {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.row td {
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--text);
+  padding: 12px 0;
+  letter-spacing: 0.5px;
+}
+
+.rowSelf {
+  border-left: 3px solid #fbbf24;
+  background: rgba(251, 191, 36, 0.06);
+}
+
+.rowSelf td {
+  color: #fbbf24;
+}
+
+/* ── Column widths ────────────────────────────────────── */
+
+.rank {
+  width: 50px;
+  color: var(--text-dim) !important;
+  font-size: 10px !important;
+  letter-spacing: 1px;
+}
+
+.player { width: 220px; }
+
+.time {
+  width: 120px;
+  font-family: 'Space Mono', monospace !important;
+}
+
+.date {
+  color: var(--text-dim) !important;
+  font-size: 10px !important;
+}

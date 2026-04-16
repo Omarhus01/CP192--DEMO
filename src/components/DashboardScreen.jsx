@@ -37,7 +37,7 @@ function getPhaseProgress(levelIdx, completedLevels, checkpoints) {
 
 const TOTAL = LEVELS_DATA.length
 
-export default function DashboardScreen({ completedLevels = [], checkpoints = {}, bestTimes = {}, onContinue, onLevelSelect, onLockedLevel }) {
+export default function DashboardScreen({ completedLevels = [], checkpoints = {}, bestTimes = {}, onContinue, onLevelSelect, onLockedLevel, onLeaderboard }) {
   const [visible, setVisible] = useState(false)
   const [selectedPhases, setSelectedPhases] = useState({})
 
@@ -160,6 +160,10 @@ export default function DashboardScreen({ completedLevels = [], checkpoints = {}
             )
           })}
         </div>
+
+        <button className={styles.leaderboardBtn} onClick={onLeaderboard}>
+          LEADERBOARD
+        </button>
 
         <button className={styles.continueBtn} onClick={onContinue}>
           ENTER FACILITY

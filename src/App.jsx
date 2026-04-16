@@ -8,7 +8,8 @@ import OnboardingQuiz  from './components/OnboardingQuiz.jsx'
 import ConceptScreen   from './components/ConceptScreen.jsx'
 import CreditsScreen   from './components/CreditsScreen.jsx'
 import LoginScreen     from './components/LoginScreen.jsx'
-import DashboardScreen from './components/DashboardScreen.jsx'
+import DashboardScreen    from './components/DashboardScreen.jsx'
+import LeaderboardScreen  from './components/LeaderboardScreen.jsx'
 import { level1 }     from './levels/level1.js'
 import { level2 }     from './levels/level2.js'
 import { level3 }     from './levels/level3.js'
@@ -106,8 +107,9 @@ export default function App() {
       concept:   'title',
       title:     'title',
       login:     'title',
-      dashboard: 'title',
-      level:     'level',
+      dashboard:   'title',
+      leaderboard: 'title',
+      level:       'level',
       overflow:  'overflow',
     }
     const key = MAP[screen]
@@ -214,6 +216,10 @@ export default function App() {
   function handleDashboardContinue() {
     navigateTo('quiz')
   }
+
+  // ── Leaderboard ───────────────────────────────────────────────────────────────
+  function handleOpenLeaderboard()  { navigateTo('leaderboard') }
+  function handleCloseLeaderboard() { navigateTo('dashboard')   }
 
   // ── Dashboard level card click → jump to that level ──────────────────────────
   function handleDashboardLevelSelect(idx, phase) {
@@ -360,6 +366,7 @@ export default function App() {
           onLevelSelect={handleDashboardLevelSelect}
           onLockedLevel={handleLockedLevel}
           onSignOut={handleSignOut}
+          onLeaderboard={handleOpenLeaderboard}
         />
       )}
 
@@ -379,6 +386,13 @@ export default function App() {
           onCheckpoint={handleCheckpoint}
           onDashboard={() => navigateTo('dashboard')}
           currentUser={currentUser}
+        />
+      )}
+
+      {screen === 'leaderboard' && (
+        <LeaderboardScreen
+          currentUser={currentUser}
+          onBack={handleCloseLeaderboard}
         />
       )}
 
@@ -407,7 +421,7 @@ export default function App() {
       )}
 
       {/* Narrator bar — everywhere except overflow and credits (credits has its own) */}
-      {screen !== 'overflow' && screen !== 'credits' && (
+      {screen !== 'overflow' && screen !== 'credits' && screen !== 'leaderboard' && (
         <NarratorBox
           line={narratorLine}
           expression={expression}

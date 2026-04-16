@@ -254,6 +254,26 @@
 
 /* ── Continue button ──────────────────────────────────── */
 
+.leaderboardBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font); font-size: 11px; font-weight: 700;
+  letter-spacing: 3px; padding: 11px 36px;
+  border-radius: 3px;
+  transition: all 0.2s;
+  width: 100%;
+  max-width: 220px;
+}
+
+.leaderboardBtn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  box-shadow: 0 0 14px rgba(37,99,235,0.15);
+}
+
+/* ── Continue button ──────────────────────────────────── */
+
 .continueBtn {
   background: var(--blue); color: #fff;
   font-family: var(--font); font-size: 13px; font-weight: 700;

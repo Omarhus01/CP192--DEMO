@@ -34,6 +34,7 @@ let pendingKey    = null
 
 // ── Public music API ──────────────────────────────────────────────────────────
 
+/** Initialises the HTMLAudioElement and Web Audio context. Must be called on the first user gesture. */
 export function initMusic() {
   if (audioReady) return
   audioReady = true
@@ -52,6 +53,11 @@ export function initMusic() {
   }
 }
 
+/**
+ * Starts playing the named track. No-ops if that track is already playing.
+ * Queues the key if initMusic() hasn't been called yet.
+ * @param {'title'|'level'|'levelComplete'|'overflow'|'credits'} key
+ */
 export function playTrack(key) {
   if (key === currentKey) return   // already playing this track
   if (!audioReady) {
@@ -61,6 +67,10 @@ export function playTrack(key) {
   _startTrack(key)
 }
 
+/**
+ * Mutes or unmutes background music by setting the volume to 0 or the track's default.
+ * @param {boolean} muted
+ */
 export function setMuted(muted) {
   isMutedGlobal = muted
   if (!musicEl) return
@@ -68,6 +78,10 @@ export function setMuted(muted) {
   musicEl.volume = muted ? 0 : (cfg?.volume ?? 0.15)
 }
 
+/**
+ * Starts a track with a gradual volume fade-in over ~4 seconds.
+ * @param {'title'|'level'|'levelComplete'|'overflow'|'credits'} key
+ */
 export function fadeInTrack(key) {
   if (!audioReady) { pendingKey = key; return }
   const cfg = TRACKS[key]
@@ -122,7 +136,10 @@ function sfxGain(volume) {
 
 // ── Sound effects ─────────────────────────────────────────────────────────────
 
-/** Short glitchy descending tone — clone spawns */
+/**
+ * Short glitchy descending tone — clone spawns.
+ * @param {boolean} isMuted
+ */
 export function playSpawnSound(isMuted) {
   if (isMuted || !ensureCtx()) return
   const now  = ctx.currentTime
@@ -140,7 +157,10 @@ export function playSpawnSound(isMuted) {
   osc.start(now); osc.stop(now + 0.16)
 }
 
-/** Clean ascending chime — correct solution */
+/**
+ * Clean ascending chime — correct solution.
+ * @param {boolean} isMuted
+ */
 export function playSuccessSound(isMuted) {
   if (isMuted || !ensureCtx()) return
   const now   = ctx.currentTime
@@ -161,7 +181,10 @@ export function playSuccessSound(isMuted) {
   })
 }
 
-/** Loud dissonant burst — stack overflow */
+/**
+ * Loud dissonant burst — stack overflow.
+ * @param {boolean} isMuted
+ */
 export function playOverflowSound(isMuted) {
   if (isMuted || !ensureCtx()) return
   const now = ctx.currentTime
@@ -180,7 +203,10 @@ export function playOverflowSound(isMuted) {
   })
 }
 
-/** Short descending dissonant buzz — wrong answer */
+/**
+ * Short descending dissonant buzz — wrong answer.
+ * @param {boolean} isMuted
+ */
 export function playWrongSound(isMuted) {
   if (isMuted || !ensureCtx()) return
   const now = ctx.currentTime
@@ -197,7 +223,10 @@ export function playWrongSound(isMuted) {
   })
 }
 
-/** Light ping — base case reached */
+/**
+ * Light ping — base case reached.
+ * @param {boolean} isMuted
+ */
 export function playBaseCaseSound(isMuted) {
   if (isMuted || !ensureCtx()) return
   const now  = ctx.currentTime
@@ -212,7 +241,10 @@ export function playBaseCaseSound(isMuted) {
   osc.start(now); osc.stop(now + 0.35)
 }
 
-/** Two-note ascending chime — new best time */
+/**
+ * Two-note ascending chime — new best time.
+ * @param {boolean} isMuted
+ */
 export function playNewBestSound(isMuted) {
   if (isMuted || !ensureCtx()) return
   const now   = ctx.currentTime
@@ -230,7 +262,10 @@ export function playNewBestSound(isMuted) {
   })
 }
 
-/** Subtle UI click — narrator begins speaking */
+/**
+ * Subtle UI click — narrator begins speaking.
+ * @param {boolean} isMuted
+ */
 export function playNarratorClick(isMuted) {
   if (isMuted || !ensureCtx()) return
   const now  = ctx.currentTime

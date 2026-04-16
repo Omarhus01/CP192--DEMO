@@ -1,3 +1,9 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  firebaseConfig.js
+//  Initialises the Firebase app from Vite environment variables.
+//  Exports: auth (Firebase Auth), db (Firestore instance).
+// ═══════════════════════════════════════════════════════════════════════════
+
 import { initializeApp } from 'firebase/app'
 import { getAuth }       from 'firebase/auth'
 import { getFirestore }  from 'firebase/firestore'

@@ -11,11 +11,13 @@ const MAX_CALLS = 60
 
 let _pyodide = null
 
+/** Loads the Pyodide runtime. Safe to call multiple times — initialises only once. */
 export async function initPyodide() {
   if (_pyodide) return
   _pyodide = await loadPyodide()
 }
 
+/** Returns true once initPyodide() has completed successfully. */
 export function isPyodideReady() {
   return _pyodide !== null
 }
@@ -84,10 +86,12 @@ print(__jv({"steps": __steps, "result": __result, "error": __error}))
 // ── Main executor ─────────────────────────────────────────────────────────────
 
 /**
- * Execute the user's Python function body using Pyodide.
- * @returns {Promise<{ outcome, steps, result, error }>}
- *
- * outcome: 'success' | 'overflow' | 'earlyExit' | 'wrongResult' | 'syntaxError'
+ * Executes the player's Python function body using Pyodide.
+ * Wraps the function with an instrumented version that records each call/return as a step.
+ * @param {object} level — level config (functionName, paramName, initialValue, id, expectedResult)
+ * @param {string} userCode — raw text from the code editor
+ * @returns {Promise<{ outcome: string, steps: object[], result: number|null, error: string|null }>}
+ *   outcome: 'success' | 'overflow' | 'earlyExit' | 'wrongResult' | 'syntaxError'
  */
 export async function executeCode(level, userCode) {
   const { functionName, paramName, initialValue } = level
@@ -196,6 +200,13 @@ function determineOutcome(level, callCount, result) {
 
 // ── Unrecognized pattern check ────────────────────────────────────────────────
 
+/**
+ * Returns true if the code has a recursive call but no conditional — used to flag
+ * unconventional solutions that technically pass the outcome check.
+ * @param {string} userCode
+ * @param {string} functionName
+ * @returns {boolean}
+ */
 export function isUnrecognizedCode(userCode, functionName) {
   const hasRecursion   = new RegExp(`\\b${functionName}\\s*\\(`).test(userCode)
   const hasConditional = /\bif\b/.test(userCode)

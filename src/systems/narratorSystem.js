@@ -288,6 +288,11 @@ export const LINES = {
 
 // ── Voice settings by escalation level ───────────────────────────────────────
 
+/**
+ * Returns ElevenLabs voice settings tuned to the player's frustration level.
+ * @param {number} attemptCount — total wrong attempts this level
+ * @returns {{ stability: number, similarity_boost: number, style: number }}
+ */
 export function getVoiceSettings(attemptCount) {
   if (attemptCount >= 7) return { stability: 0.1,  similarity_boost: 0.9,  style: 0.95 }
   if (attemptCount >= 5) return { stability: 0.3,  similarity_boost: 0.85, style: 0.65 }
@@ -303,12 +308,27 @@ const SYNTAX_REPEAT_LINES = [
   "We are going to be here until the indentation is correct. I've made my peace with that. Have you?",
 ]
 
+/**
+ * Returns a narrator line for repeated syntax errors.
+ * Starts at count === 3; clamps at the last available line.
+ * @param {number} count — total syntax error attempts
+ * @returns {string}
+ */
 export function getSyntaxRepeatLine(count) {
   return SYNTAX_REPEAT_LINES[Math.min(count - 3, SYNTAX_REPEAT_LINES.length - 1)]
 }
 
 // ── Dialogue selection ───────────────────────────────────────────────────────
 
+/**
+ * Picks the next narrator line for a trigger key.
+ * Special keys: 'noBaseCase' escalates by attemptCount; 'correct' selects by tier.
+ * All other keys rotate through their array via lineTracker.
+ * @param {string} triggerKey — key into LINES
+ * @param {object} narratorState — current narrator state (uses attemptCount)
+ * @param {object} lineTracker — per-key rotation counters, defaults to {}
+ * @returns {{ text: string|null, nextTracker: object }}
+ */
 export function getLine(triggerKey, narratorState, lineTracker = {}) {
   const lines = LINES[triggerKey]
   if (!lines || lines.length === 0) return { text: null, nextTracker: lineTracker }
@@ -335,6 +355,11 @@ export function getLine(triggerKey, narratorState, lineTracker = {}) {
 
 // ── Expression state ─────────────────────────────────────────────────────────
 
+/**
+ * Returns the narrator's portrait expression based on player frustration.
+ * @param {object} narratorState
+ * @returns {'neutral' | 'stressed' | 'gone'}
+ */
 export function getExpression(narratorState) {
   if (narratorState.attemptCount >= 5) return 'gone'
   if (narratorState.attemptCount >= 3) return 'stressed'
@@ -356,6 +381,7 @@ export const FINALE_LINES = [
 
 let currentAudio = null;
 
+/** Stops and discards the currently-playing TTS audio, if any. */
 export function stopAudio() {
   if (currentAudio) {
     currentAudio.onended = null
@@ -366,6 +392,14 @@ export function stopAudio() {
   }
 }
 
+/**
+ * Fetches TTS audio from ElevenLabs and plays it. Cancels any in-flight audio first.
+ * No-ops when isMuted is true or text is falsy.
+ * @param {string}  text
+ * @param {boolean} isMuted
+ * @param {number}  [attemptCount=0] — drives voice intensity via getVoiceSettings
+ * @param {object}  [emotionOverride=null] — explicit ElevenLabs voice_settings object
+ */
 export async function speak(text, isMuted, attemptCount = 0, emotionOverride = null) {
   console.log('[speak] called:', {
     text:            text?.slice(0, 60),
@@ -448,6 +482,11 @@ export async function speak(text, isMuted, attemptCount = 0, emotionOverride = n
   }
 }
 
+/**
+ * Speaks the noBaseCase line matching the current attempt count, always at maximum intensity.
+ * @param {boolean} isMuted
+ * @param {number}  [attemptCount=0]
+ */
 export async function speakOverflow(isMuted, attemptCount = 0) {
   const index = Math.min(Math.max(attemptCount - 1, 0), LINES.noBaseCase.length - 1)
   await speak(LINES.noBaseCase[index], isMuted, attemptCount, { stability: 0.1, similarity_boost: 0.9, style: 0.95 })
